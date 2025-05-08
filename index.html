@@ -187,6 +187,109 @@
                 transform: translateY(0);
             }
         }
+        .flight-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .countdown {
+            font-size: 2rem;
+            color: #e74c3c;
+            margin: 20px 0;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+        }
+        .flight-route {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+        .flight-details {
+            text-align: left;
+            margin: 10px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+        }
+        .flight-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        .map-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .flight-path {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500"><path d="M100,250 C300,150 700,350 900,250" stroke="%23e74c3c" stroke-width="3" fill="none" stroke-dasharray="5,5"/><circle cx="100" cy="250" r="8" fill="%234a90e2"/><circle cx="900" cy="250" r="8" fill="%232ecc71"/></svg>') no-repeat center center;
+            background-size: contain;
+            animation: pathGlow 2s infinite;
+        }
+        .plane {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21,16V14L13,9V3.5C13,2.67 12.33,2 11.5,2C10.67,2 10,2.67 10,3.5V9L2,14V16L10,13.5V19L8,20.5L8,22L11.5,21L15,22L15,20.5L13,19V13.5L21,16Z" fill="%23e74c3c"/></svg>') no-repeat center center;
+            background-size: contain;
+            animation: planeMove 4s infinite;
+            filter: drop-shadow(0 0 8px rgba(231, 76, 60, 0.7));
+        }
+        @keyframes planeMove {
+            0% { left: 10%; top: 50%; transform: translateY(-50%) rotate(0deg) scale(1); }
+            25% { left: 30%; top: 45%; transform: translateY(-50%) rotate(5deg) scale(1.1); }
+            50% { left: 50%; top: 40%; transform: translateY(-50%) rotate(0deg) scale(1); }
+            75% { left: 70%; top: 45%; transform: translateY(-50%) rotate(-5deg) scale(1.1); }
+            100% { left: 90%; top: 50%; transform: translateY(-50%) rotate(0deg) scale(1); }
+        }
+        @keyframes pathGlow {
+            0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 5px rgba(231, 76, 60, 0.3)); }
+            50% { opacity: 1; filter: drop-shadow(0 0 10px rgba(231, 76, 60, 0.6)); }
+        }
+        .city-label {
+            position: absolute;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            animation: labelPulse 2s infinite;
+        }
+        @keyframes labelPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .london {
+            top: 45%;
+            left: 10%;
+        }
+        .urumqi {
+            top: 45%;
+            right: 10%;
+        }
     </style>
 </head>
 <body>
@@ -196,6 +299,35 @@
         <h1>亲爱的禾子涵 <span class="heart" onclick="showLove()">❤</span></h1>
         
         <div class="daily-message" id="dailyMessage"></div>
+
+        <div class="flight-info">
+            <h2>航班信息</h2>
+            <div class="countdown" id="countdown"></div>
+            <div class="flight-route">
+                <div class="flight-details">
+                    <h3>第一段航班</h3>
+                    <p>航班号：CZ608</p>
+                    <p>伦敦 → 乌鲁木齐</p>
+                    <p>起飞时间：2024年4月11日</p>
+                    <p>预计飞行时间：8小时</p>
+                </div>
+                <div class="flight-details">
+                    <h3>第二段航班</h3>
+                    <p>航班号：CZ6940</p>
+                    <p>乌鲁木齐 → 目的地</p>
+                    <p>转机时间：2小时</p>
+                </div>
+            </div>
+            <div class="flight-status" id="flightStatus">
+                航班状态：等待起飞
+            </div>
+            <div class="map-container">
+                <div class="flight-path"></div>
+                <div class="plane"></div>
+                <div class="city-label london">伦敦</div>
+                <div class="city-label urumqi">乌鲁木齐</div>
+            </div>
+        </div>
         
         <div class="message">
             考试加油！我相信你一定可以做到最好！
@@ -251,6 +383,25 @@
     </div>
 
     <script>
+        // 倒计时功能
+        function updateCountdown() {
+            const targetDate = new Date('2024-04-11T00:00:00+01:00'); // 英国时间
+            const now = new Date();
+            const diff = targetDate - now;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').innerHTML = 
+                `距离你回国还有：<br>${days}天 ${hours}小时 ${minutes}分钟 ${seconds}秒`;
+
+            if (diff > 0) {
+                setTimeout(updateCountdown, 1000);
+            }
+        }
+
         // 星空背景
         const canvas = document.getElementById('stars');
         const ctx = canvas.getContext('2d');
@@ -326,6 +477,7 @@
         window.onload = function() {
             createStars();
             updateDailyMessage();
+            updateCountdown();
             setInterval(updateDailyMessage, 5000);
         };
 
