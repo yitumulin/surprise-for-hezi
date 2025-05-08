@@ -172,16 +172,7 @@
             animation: fadeInOut 5s infinite;
         }
         .music-player {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: none;
         }
         .star {
             position: absolute;
@@ -474,13 +465,6 @@
         </div>
     </div>
 
-    <div class="music-player">
-        <button onclick="toggleMusic()">🎵</button>
-        <audio id="bgMusic" loop>
-            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-        </audio>
-    </div>
-
     <script>
         // 倒计时功能
         function updateCountdown() {
@@ -560,36 +544,6 @@
             wish.style.animation = 'fadeInOut 2s forwards';
             document.body.appendChild(wish);
             setTimeout(() => wish.remove(), 2000);
-        }
-
-        // 音乐播放器
-        const bgMusic = document.getElementById('bgMusic');
-        function toggleMusic() {
-            if (bgMusic.paused) {
-                bgMusic.play();
-            } else {
-                bgMusic.pause();
-            }
-        }
-
-        // 添加漂浮爱心背景
-        function createFloatingHearts() {
-            const loveBg = document.createElement('div');
-            loveBg.className = 'love-bg';
-            document.body.appendChild(loveBg);
-
-            setInterval(() => {
-                const heart = document.createElement('div');
-                heart.className = 'floating-heart';
-                heart.innerHTML = '❤';
-                heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
-                loveBg.appendChild(heart);
-
-                setTimeout(() => {
-                    heart.remove();
-                }, 6000);
-            }, 300);
         }
 
         // 页面加载完成后初始化
