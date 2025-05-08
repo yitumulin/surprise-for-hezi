@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Microsoft YaHei', sans-serif;
-            background: #000;
+            background: linear-gradient(135deg, #ff6b6b, #ffc3a0);
             margin: 0;
             padding: 0;
             min-height: 100vh;
@@ -27,18 +27,48 @@
             height: 100%;
             z-index: -1;
         }
+        .love-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        .floating-heart {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 20px;
+            animation: floatHeart 6s infinite;
+            pointer-events: none;
+        }
+        @keyframes floatHeart {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) scale(1);
+                opacity: 0;
+            }
+        }
         .container {
             text-align: center;
             padding: 2rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
             max-width: 800px;
             margin: 20px;
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         h1 {
             color: #fff;
@@ -473,9 +503,30 @@
             }
         }
 
+        // 添加漂浮爱心背景
+        function createFloatingHearts() {
+            const loveBg = document.createElement('div');
+            loveBg.className = 'love-bg';
+            document.body.appendChild(loveBg);
+
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.className = 'floating-heart';
+                heart.innerHTML = '❤';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                loveBg.appendChild(heart);
+
+                setTimeout(() => {
+                    heart.remove();
+                }, 6000);
+            }, 300);
+        }
+
         // 页面加载完成后初始化
         window.onload = function() {
             createStars();
+            createFloatingHearts();
             updateDailyMessage();
             updateCountdown();
             setInterval(updateDailyMessage, 5000);
