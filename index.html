@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>给禾子涵的惊喜</title>
+    <title>给最特别的你</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4DLD3J37FH"></script>
     <script>
@@ -15,8 +16,6 @@
     </script>
     <style>
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #ff6b6b, #ffc3a0);
             margin: 0;
             padding: 0;
             min-height: 100vh;
@@ -24,8 +23,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: white;
-            position: relative;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Arial', sans-serif;
             overflow-x: hidden;
         }
         #stars {
@@ -69,29 +68,54 @@
         .container {
             text-align: center;
             padding: 2rem;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
             max-width: 800px;
-            margin: 20px;
-            position: relative;
-            overflow: hidden;
+            width: 90%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: gentleFloat 6s ease-in-out infinite;
+        }
+        .container:hover {
+            transform: translateY(-5px);
         }
         h1 {
-            color: #fff;
-            margin-bottom: 1rem;
-            animation: fadeIn 2s ease-in;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: fadeInDown 1s ease;
+            background: linear-gradient(90deg, #2c3e50, #e74c3c, #2c3e50);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+        }
+        .countdown {
+            font-size: 2rem;
+            color: #e74c3c;
+            margin: 2rem 0;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            animation: pulse 2s infinite;
+            animation: glowPulse 2s infinite;
+            background: linear-gradient(135deg, #fff5f5, #ffe3e3);
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(231, 76, 60, 0.2);
         }
         .message {
             font-size: 1.2rem;
-            color: #fff;
+            color: #34495e;
             margin: 1rem 0;
             line-height: 1.6;
             opacity: 0;
-            animation: slideUp 1s ease-out forwards;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+            animation-delay: 0.5s;
         }
         .heart {
             color: #e74c3c;
@@ -129,7 +153,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.95);
+            background: linear-gradient(135deg, #fff, #f8f9fa);
             padding: 2rem;
             border-radius: 15px;
             max-width: 600px;
@@ -138,10 +162,30 @@
             z-index: 1000;
             display: none;
             box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .letter.show {
+            transform: scale(1);
+            opacity: 1;
         }
         .letter-content {
             text-align: left;
             line-height: 1.8;
+            position: relative;
+        }
+        .letter-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0,0 L100,0 L100,100 L0,100 Z" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1"/></svg>');
+            opacity: 0.1;
+            pointer-events: none;
         }
         .close-letter {
             position: absolute;
@@ -150,6 +194,11 @@
             cursor: pointer;
             font-size: 1.5rem;
             color: #666;
+            transition: all 0.3s ease;
+        }
+        .close-letter:hover {
+            transform: rotate(90deg);
+            color: #e74c3c;
         }
         .photo-slider {
             width: 100%;
@@ -203,11 +252,17 @@
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        @keyframes slideUp {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -218,297 +273,406 @@
             }
         }
         .flight-info {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .countdown {
-            font-size: 2rem;
-            color: #e74c3c;
-            margin: 20px 0;
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
-        }
-        .flight-route {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 20px 0;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            backdrop-filter: blur(5px);
-        }
-        .flight-details {
-            text-align: left;
-            margin: 10px 0;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: white;
-        }
-        .flight-status {
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        .map-container {
-            width: 100%;
-            height: 700px;
-            margin: 20px 0;
-            border-radius: 25px;
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            position: relative;
             overflow: hidden;
-            position: relative;
-            background: rgba(0, 0, 0, 0.3);
-            perspective: 4000px;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-            transform-style: preserve-3d;
-            transition: all 0.5s ease;
         }
-        .map-container:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 60px rgba(0, 0, 0, 0.6);
+        .flight-info:hover {
+            transform: scale(1);
         }
-        .earth-map {
-            width: 100%;
-            height: 100%;
-            background: url('https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74393/world.200412.3x5400x2700.jpg') no-repeat center center;
-            background-size: cover;
-            animation: rotateEarth 300s linear infinite;
-            position: relative;
-            transform-style: preserve-3d;
-            border-radius: 25px;
-            filter: brightness(1.2) contrast(1.1) saturate(1.1);
-        }
-        .flight-path {
+        .flight-info::before {
+            content: '';
             position: absolute;
-            top: 0;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+        .flight-info p {
+            margin: 0.5rem 0;
+            color: #2c3e50;
+        }
+        .flight-info .highlight {
+            color: #e74c3c;
+            font-weight: bold;
+            position: relative;
+            display: inline-block;
+            padding: 0 5px;
+        }
+        .flight-info .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500"><defs><linearGradient id="flightGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:%23e74c3c;stop-opacity:0.5"/><stop offset="25%" style="stop-color:%23e74c3c;stop-opacity:0.7"/><stop offset="50%" style="stop-color:%23e74c3c;stop-opacity:1"/><stop offset="75%" style="stop-color:%23e74c3c;stop-opacity:0.7"/><stop offset="100%" style="stop-color:%23e74c3c;stop-opacity:0.5"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M100,250 C200,150 300,200 400,250 C500,300 600,200 700,250 C800,300 900,250 900,250" stroke="url(%23flightGradient)" stroke-width="6" fill="none" stroke-dasharray="10,10" filter="url(%23glow)"/><circle cx="100" cy="250" r="15" fill="%234a90e2" filter="url(%23glow)"/><circle cx="900" cy="250" r="15" fill="%232ecc71" filter="url(%23glow)"/></svg>') no-repeat center center;
-            background-size: contain;
-            animation: pathGlow 5s infinite;
-            mix-blend-mode: screen;
-            filter: drop-shadow(0 0 25px rgba(231, 76, 60, 0.7));
-            transform-style: preserve-3d;
+            height: 2px;
+            background: #e74c3c;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
         }
-        .plane {
+        .flight-info .highlight:hover::after {
+            transform: scaleX(1);
+        }
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #3498db;
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button::after {
+            content: '';
             position: absolute;
-            width: 70px;
-            height: 70px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><defs><filter id="planeGlow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M21,16V14L13,9V3.5C13,2.67 12.33,2 11.5,2C10.67,2 10,2.67 10,3.5V9L2,14V16L10,13.5V19L8,20.5L8,22L11.5,21L15,22L15,20.5L13,19V13.5L21,16Z" fill="%23e74c3c" filter="url(%23planeGlow)"/></svg>') no-repeat center center;
-            background-size: contain;
-            animation: planeMove 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-            filter: drop-shadow(0 0 25px rgba(231, 76, 60, 0.9));
-            mix-blend-mode: screen;
-            transform-style: preserve-3d;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+        button:hover::after {
+            animation: shimmer 1s infinite;
+        }
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .music-control:hover {
+            transform: scale(1.1);
+        }
+        .music-control i {
+            font-size: 24px;
+            color: #3498db;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .countdown {
+                font-size: 1.2rem;
+                padding: 0.8rem 1.5rem;
+            }
+            .message {
+                font-size: 1rem;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+            .flight-info {
+                padding: 1rem;
+            }
+            .letter {
+                width: 95%;
+                margin: 1rem;
+            }
+        }
+        .floating-hearts {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            perspective: 1000px;
+        }
+        .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ff6b6b;
+            transform: rotate(45deg);
+            opacity: 0;
+            animation: float 6s ease-in infinite;
+            filter: drop-shadow(0 0 5px rgba(255, 107, 107, 0.5));
+        }
+        .heart:before,
+        .heart:after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ff6b6b;
+            border-radius: 50%;
+        }
+        .heart:before {
+            left: -10px;
+        }
+        .heart:after {
+            top: -10px;
+        }
+        @keyframes float {
+            0% {
+                transform: rotate(45deg) translateY(0) scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: rotate(45deg) translateY(-1000px) scale(1);
+                opacity: 0;
+            }
+        }
+        @keyframes shimmer {
+            0% { background-position: -100% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(231, 76, 60, 0.6); }
+        }
+        .mood-tracker {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        .mood-options {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .mood-option {
+            font-size: 2rem;
             cursor: pointer;
             transition: transform 0.3s ease;
         }
-        .plane:hover {
+        .mood-option:hover {
             transform: scale(1.2);
         }
-        @keyframes planeMove {
-            0% { 
-                left: 10%; 
-                top: 50%; 
-                transform: translateY(-50%) rotate(0deg) scale(1) translateZ(100px);
-                filter: drop-shadow(0 0 25px rgba(231, 76, 60, 0.9));
-            }
-            25% { 
-                left: 30%; 
-                top: 45%; 
-                transform: translateY(-50%) rotate(5deg) scale(1.3) translateZ(150px);
-                filter: drop-shadow(0 0 35px rgba(231, 76, 60, 1));
-            }
-            50% { 
-                left: 50%; 
-                top: 40%; 
-                transform: translateY(-50%) rotate(0deg) scale(1) translateZ(200px);
-                filter: drop-shadow(0 0 25px rgba(231, 76, 60, 0.9));
-            }
-            75% { 
-                left: 70%; 
-                top: 45%; 
-                transform: translateY(-50%) rotate(-5deg) scale(1.3) translateZ(150px);
-                filter: drop-shadow(0 0 35px rgba(231, 76, 60, 1));
-            }
-            100% { 
-                left: 90%; 
-                top: 50%; 
-                transform: translateY(-50%) rotate(0deg) scale(1) translateZ(100px);
-                filter: drop-shadow(0 0 25px rgba(231, 76, 60, 0.9));
-            }
-        }
-        @keyframes rotateEarth {
-            from { transform: rotate(0deg) rotateX(35deg) rotateY(20deg); }
-            to { transform: rotate(360deg) rotateX(35deg) rotateY(20deg); }
-        }
-        @keyframes pathGlow {
-            0%, 100% { 
-                opacity: 0.9; 
-                filter: drop-shadow(0 0 20px rgba(231, 76, 60, 0.6));
-            }
-            50% { 
-                opacity: 1; 
-                filter: drop-shadow(0 0 30px rgba(231, 76, 60, 0.9));
-            }
-        }
-        .map-overlay {
-            position: absolute;
+        .wish-container {
+            display: none;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(45deg, rgba(0,0,0,0.2), rgba(0,0,0,0.1));
-            pointer-events: none;
-            transform-style: preserve-3d;
-            border-radius: 25px;
-            backdrop-filter: blur(3px);
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
         }
-        .city-label {
-            position: absolute;
-            padding: 15px 30px;
-            background: rgba(255, 255, 255, 0.35);
-            border-radius: 20px;
-            color: white;
-            font-size: 1.3rem;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
-            animation: labelPulse 4s infinite;
-            z-index: 2;
-            transform-style: preserve-3d;
-            font-weight: bold;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .city-label:hover {
-            transform: scale(1.1) translateZ(100px);
-            background: rgba(255, 255, 255, 0.45);
-            box-shadow: 0 0 35px rgba(255, 255, 255, 0.5);
-        }
-        .london {
-            top: 45%;
-            left: 10%;
-            transform: translateZ(100px);
-        }
-        .urumqi {
-            top: 45%;
-            right: 10%;
-            transform: translateZ(100px);
-        }
-        .map-info {
-            position: absolute;
-            bottom: 25px;
-            right: 25px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 12px 25px;
+        .wish-content {
+            background: white;
+            padding: 2rem;
             border-radius: 15px;
-            font-size: 1.1rem;
-            backdrop-filter: blur(10px);
-            z-index: 2;
-            transform: translateZ(80px);
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            transition: all 0.3s ease;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
         }
-        .map-info:hover {
-            transform: scale(1.05) translateZ(90px);
+        .wish-content textarea {
+            width: 100%;
+            height: 150px;
+            margin: 1rem 0;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: none;
+        }
+        .photo-gallery {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
         }
-        @keyframes labelPulse {
-            0%, 100% { 
-                transform: scale(1) translateZ(100px);
-                box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
-            }
-            50% { 
-                transform: scale(1.08) translateZ(120px);
-                box-shadow: 0 0 35px rgba(255, 255, 255, 0.5);
-            }
+        .gallery-content {
+            padding: 2rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        .btn-primary, .btn-secondary, .btn-tertiary {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+        .btn-secondary {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+        .btn-tertiary {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+        .close-wish, .close-gallery {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+        .close-wish:hover, .close-gallery:hover {
+            color: #e74c3c;
         }
     </style>
 </head>
 <body>
-    <canvas id="stars"></canvas>
+    <div class="floating-hearts"></div>
     
     <div class="container">
-        <h1>亲爱的宝宝 <span class="heart" onclick="showLove()">❤</span></h1>
+        <h1>亲爱的，我想对你说</h1>
         
-        <div class="daily-message" id="dailyMessage"></div>
-
+        <div class="countdown" id="countdown"></div>
+        
+        <div class="message" id="message">亲爱的，考试加油！</div>
+        
         <div class="flight-info">
             <h2>航班信息</h2>
-            <div class="countdown" id="countdown"></div>
-            <div class="flight-route">
-                <div class="flight-details">
-                    <h3>第一段航班</h3>
-                    <p>航班号：CZ608</p>
-                    <p>伦敦 → 乌鲁木齐</p>
-                    <p>起飞时间：2025年5月11日</p>
-                    <p>预计飞行时间：8小时</p>
-                </div>
-                <div class="flight-details">
-                    <h3>第二段航班</h3>
-                    <p>航班号：CZ6940</p>
-                    <p>乌鲁木齐 → 目的地</p>
-                    <p>转机时间：2小时</p>
-                </div>
-            </div>
-            <div class="flight-status" id="flightStatus">
-                航班状态：等待起飞
-            </div>
-            <div class="map-container">
-                <div class="earth-map"></div>
-                <div class="map-overlay"></div>
-                <div class="flight-path"></div>
-                <div class="plane"></div>
-                <div class="city-label london">伦敦</div>
-                <div class="city-label urumqi">乌鲁木齐</div>
-                <div class="map-info">NASA 实时地球图像</div>
-            </div>
-        </div>
-        
-        <div class="message">
-            考试加油！我相信你一定可以做到最好！
-        </div>
-        <div class="message">
-            记住，无论结果如何，你都是最棒的！
-        </div>
-        <div class="message">
-            放松心情，保持自信，你一定能行！
-        </div>
-        <div class="message">
-            等你回来，我们一起去吃好吃的！
+            <p>航班号：<span class="highlight">CA1234</span></p>
+            <p>出发地：<span class="highlight">伦敦</span></p>
+            <p>目的地：<span class="highlight">乌鲁木齐</span></p>
+            <p>预计到达时间：<span class="highlight">2025年2月15日</span></p>
         </div>
 
-        <button class="button" onclick="showLetter()">点我读信</button>
-        
-        <div id="surprise" class="hidden">
-            <div class="message">
-                这里有一些放松的音乐，希望可以帮助你缓解压力：
-            </div>
-            <div class="music-container">
-                <div class="music-card">
-                    <h3>轻音乐</h3>
-                    <iframe width="100%" height="80" src="https://www.youtube.com/embed/jfKfPfyJRdk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-                <div class="music-card">
-                    <h3>自然声音</h3>
-                    <iframe width="100%" height="80" src="https://www.youtube.com/embed/1ZYbU82GVz4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
+        <div class="controls">
+            <button onclick="showLetter()" class="btn-primary">
+                <i class="fas fa-envelope"></i> 打开我的信
+            </button>
+            <button onclick="showPhoto()" class="btn-secondary">
+                <i class="fas fa-camera"></i> 查看照片
+            </button>
+            <button onclick="showWishes()" class="btn-tertiary">
+                <i class="fas fa-star"></i> 许下心愿
+            </button>
+        </div>
+
+        <div class="mood-tracker">
+            <h3>今天的心情如何？</h3>
+            <div class="mood-options">
+                <span class="mood-option" onclick="updateMood('happy')">😊</span>
+                <span class="mood-option" onclick="updateMood('normal')">😐</span>
+                <span class="mood-option" onclick="updateMood('sad')">😢</span>
             </div>
         </div>
     </div>
+
+    <div class="music-control" id="musicControl">
+        <i class="fas fa-music"></i>
+    </div>
+
+    <div class="wish-container" id="wishContainer">
+        <div class="wish-content">
+            <h3>许下你的心愿</h3>
+            <textarea id="wishText" placeholder="写下你的心愿..."></textarea>
+            <button onclick="submitWish()">发送心愿</button>
+            <span class="close-wish" onclick="closeWish()">×</span>
+        </div>
+    </div>
+
+    <div class="photo-gallery" id="photoGallery">
+        <div class="gallery-content">
+            <div class="gallery-header">
+                <h3>我们的回忆</h3>
+                <span class="close-gallery" onclick="closeGallery()">×</span>
+            </div>
+            <div class="gallery-grid">
+                <!-- 照片将通过JavaScript动态添加 -->
+            </div>
+        </div>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="https://music.163.com/song/media/outer/url?id=1824045033.mp3" type="audio/mpeg">
+    </audio>
 
     <div class="letter" id="letter">
         <span class="close-letter" onclick="closeLetter()">×</span>
@@ -524,110 +688,246 @@
     </div>
 
     <script>
-        // 倒计时功能
+        // 优化倒计时功能
         function updateCountdown() {
-            const targetDate = new Date('2025-05-11T00:00:00+01:00'); // 英国时间
             const now = new Date();
-            const diff = targetDate - now;
+            const targetDate = new Date('2025-02-15T00:00:00');
+            const timeLeft = targetDate - now;
 
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-            document.getElementById('countdown').innerHTML = 
-                `距离你回国还有：<br>${days}天 ${hours}小时 ${minutes}分钟 ${seconds}秒`;
+            const countdownElement = document.getElementById('countdown');
+            
+            // 添加数字变化动画
+            if (countdownElement.dataset.lastSeconds !== seconds.toString()) {
+                countdownElement.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    countdownElement.style.transform = 'scale(1)';
+                }, 100);
+            }
+            
+            countdownElement.dataset.lastSeconds = seconds.toString();
+            countdownElement.innerHTML = `
+                <div class="countdown-item">${days}<span>天</span></div>
+                <div class="countdown-item">${hours}<span>时</span></div>
+                <div class="countdown-item">${minutes}<span>分</span></div>
+                <div class="countdown-item">${seconds}<span>秒</span></div>
+            `;
 
-            if (diff > 0) {
-                setTimeout(updateCountdown, 1000);
+            if (timeLeft < 0) {
+                countdownElement.innerHTML = '<div class="countdown-complete">时间到啦！</div>';
+                clearInterval(countdownInterval);
+                createConfetti();
             }
         }
 
-        // 星空背景
-        const canvas = document.getElementById('stars');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        // 优化音乐控制
+        const bgMusic = document.getElementById('bgMusic');
+        const musicControl = document.getElementById('musicControl');
+        let isMusicPlaying = false;
 
-        function createStars() {
-            for(let i = 0; i < 200; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.width = Math.random() * 3 + 'px';
-                star.style.height = star.style.width;
-                star.style.left = Math.random() * 100 + 'vw';
-                star.style.top = Math.random() * 100 + 'vh';
-                star.style.animationDelay = Math.random() * 1 + 's';
-                document.body.appendChild(star);
-                
-                star.addEventListener('click', () => {
-                    showWish();
+        musicControl.addEventListener('click', () => {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicControl.innerHTML = '<i class="fas fa-music"></i>';
+                musicControl.style.transform = 'scale(1)';
+            } else {
+                bgMusic.play().catch(error => {
+                    console.log('自动播放被阻止，需要用户交互');
                 });
+                musicControl.innerHTML = '<i class="fas fa-pause"></i>';
+                musicControl.style.transform = 'scale(1.1)';
             }
+            isMusicPlaying = !isMusicPlaying;
+        });
+
+        // 优化漂浮爱心效果
+        function createFloatingHearts() {
+            const container = document.querySelector('.floating-hearts');
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            heart.style.transform = `rotate(${Math.random() * 360}deg)`;
+            container.appendChild(heart);
+
+            // 添加鼠标交互
+            heart.addEventListener('mouseover', () => {
+                heart.style.transform = 'scale(1.5) rotate(45deg)';
+                heart.style.filter = 'brightness(1.2)';
+            });
+
+            heart.addEventListener('mouseout', () => {
+                heart.style.transform = 'rotate(45deg)';
+                heart.style.filter = 'brightness(1)';
+            });
+
+            setTimeout(() => {
+                heart.style.opacity = '0';
+                setTimeout(() => heart.remove(), 1000);
+            }, 5000);
         }
 
-        // 每日一句
+        // 优化消息切换效果
         const messages = [
-            "今天我又想你了，是很想很想的那种。",
-            "你的笑容是我最大的动力。",
-            "等你回来，我们一起去吃好吃的。",
-            "无论多远，我的心都和你在一起。",
-            "你是我最特别的人。"
+            "亲爱的，考试加油！",
+            "你是最棒的！",
+            "相信自己，你一定能行！",
+            "我永远支持你！",
+            "期待与你相见的那一天！"
         ];
 
-        function updateDailyMessage() {
-            const message = messages[Math.floor(Math.random() * messages.length)];
-            document.getElementById('dailyMessage').textContent = message;
+        let currentMessageIndex = 0;
+        const messageElement = document.getElementById('message');
+
+        function updateMessage() {
+            messageElement.style.opacity = '0';
+            messageElement.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                messageElement.textContent = messages[currentMessageIndex];
+                messageElement.style.opacity = '1';
+                messageElement.style.transform = 'translateY(0)';
+                currentMessageIndex = (currentMessageIndex + 1) % messages.length;
+            }, 500);
         }
 
-        // 信件功能
+        // 优化信件显示效果
         function showLetter() {
-            document.getElementById('letter').style.display = 'block';
+            const letter = document.getElementById('letter');
+            letter.style.display = 'block';
             document.body.style.overflow = 'hidden';
+            
+            // 添加显示动画
+            setTimeout(() => {
+                letter.classList.add('show');
+            }, 10);
         }
 
         function closeLetter() {
-            document.getElementById('letter').style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        // 许愿功能
-        function showWish() {
-            const wish = document.createElement('div');
-            wish.textContent = '你的愿望已收藏 ❤';
-            wish.style.position = 'fixed';
-            wish.style.top = Math.random() * 80 + 10 + 'vh';
-            wish.style.left = Math.random() * 80 + 10 + 'vw';
-            wish.style.color = 'white';
-            wish.style.animation = 'fadeInOut 2s forwards';
-            document.body.appendChild(wish);
-            setTimeout(() => wish.remove(), 2000);
-        }
-
-        // 页面加载完成后初始化
-        window.onload = function() {
-            createStars();
-            createFloatingHearts();
-            updateDailyMessage();
-            updateCountdown();
-            setInterval(updateDailyMessage, 5000);
-        };
-
-        // 保留原有的函数
-        function showSurprise() {
-            document.getElementById('surprise').classList.remove('hidden');
-            createConfetti();
-        }
-
-        function showLove() {
-            const heart = document.querySelector('.heart');
-            heart.style.transform = 'scale(1.5)';
+            const letter = document.getElementById('letter');
+            letter.classList.remove('show');
+            
             setTimeout(() => {
-                heart.style.transform = 'scale(1)';
+                letter.style.display = 'none';
+                document.body.style.overflow = 'auto';
             }, 300);
+        }
+
+        // 添加页面加载动画
+        window.addEventListener('load', () => {
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 1s ease';
+                document.body.style.opacity = '1';
+                
+                // 添加元素逐个显示动画
+                const elements = document.querySelectorAll('.container > *');
+                elements.forEach((element, index) => {
+                    setTimeout(() => {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }, index * 200);
+                });
+            }, 100);
+        });
+
+        // 优化鼠标跟随效果
+        let mouseX = 0;
+        let mouseY = 0;
+        let hearts = [];
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // 创建跟随爱心
+            if (Math.random() < 0.1) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.style.left = mouseX + 'px';
+                heart.style.top = mouseY + 'px';
+                heart.style.animationDuration = '1s';
+                document.body.appendChild(heart);
+                hearts.push(heart);
+                
+                setTimeout(() => {
+                    heart.remove();
+                    hearts = hearts.filter(h => h !== heart);
+                }, 1000);
+            }
+        });
+
+        // 初始化
+        const countdownInterval = setInterval(updateCountdown, 1000);
+        setInterval(createFloatingHearts, 300);
+        setInterval(updateMessage, 5000);
+        updateCountdown();
+        updateMessage();
+
+        // 新增功能
+        function showWishes() {
+            document.getElementById('wishContainer').style.display = 'flex';
+        }
+
+        function closeWish() {
+            document.getElementById('wishContainer').style.display = 'none';
+        }
+
+        function submitWish() {
+            const wishText = document.getElementById('wishText').value;
+            if (wishText.trim()) {
+                // 这里可以添加发送心愿的逻辑
+                alert('心愿已发送！');
+                closeWish();
+                createConfetti();
+            }
+        }
+
+        function showPhoto() {
+            const gallery = document.getElementById('photoGallery');
+            gallery.style.display = 'block';
+            
+            // 模拟加载照片
+            const galleryGrid = document.querySelector('.gallery-grid');
+            const photos = [
+                'https://picsum.photos/200/300?random=1',
+                'https://picsum.photos/200/300?random=2',
+                'https://picsum.photos/200/300?random=3',
+                'https://picsum.photos/200/300?random=4',
+                'https://picsum.photos/200/300?random=5',
+                'https://picsum.photos/200/300?random=6'
+            ];
+            
+            photos.forEach(photo => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.innerHTML = `<img src="${photo}" alt="回忆照片">`;
+                galleryGrid.appendChild(item);
+            });
+        }
+
+        function closeGallery() {
+            document.getElementById('photoGallery').style.display = 'none';
+        }
+
+        function updateMood(mood) {
+            const moodOptions = document.querySelectorAll('.mood-option');
+            moodOptions.forEach(option => {
+                option.style.transform = 'scale(1)';
+            });
+            
+            const selectedMood = document.querySelector(`.mood-option[onclick="updateMood('${mood}')"]`);
+            selectedMood.style.transform = 'scale(1.2)';
+            
+            // 这里可以添加保存心情的逻辑
             createConfetti();
         }
 
+        // 优化现有功能
         function createConfetti() {
             for (let i = 0; i < 50; i++) {
                 const confetti = document.createElement('div');
@@ -636,6 +936,7 @@
                 confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
                 confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
                 document.body.appendChild(confetti);
+                
                 setTimeout(() => {
                     confetti.remove();
                 }, 5000);
