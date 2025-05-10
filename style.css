@@ -1,8 +1,10 @@
-
 :root {
   --primary: #8c5a18;
   --bg: #f8f7f4;
   --text: #442a16;
+  --bg-dark: #121212;
+  --text-dark: #f1f1f1;
+  --primary-dark: #f39c12;
 }
 * { box-sizing: border-box; }
 body {
@@ -11,6 +13,24 @@ body {
   background: var(--bg);
   color: var(--text);
   text-align: center;
+  transition: background 0.3s, color 0.3s;
+}
+body.dark {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+body.dark .site-header,
+body.dark .site-footer {
+  background: #1e1e1e;
+  color: #ccc;
+}
+body.dark .btn {
+  border-color: var(--text-dark);
+  color: var(--text-dark);
+}
+body.dark .btn:hover {
+  background-color: var(--primary-dark);
+  color: white;
 }
 .container {
   max-width: 800px;
@@ -21,6 +41,7 @@ body {
   background: #fff;
   padding: .5rem 0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background 0.3s;
 }
 .logo {
   font-size: 1.5rem;
@@ -43,8 +64,11 @@ body {
   border-radius: 50%;
   object-fit: cover;
   margin-bottom: 1.5rem;
+  transition: transform 0.3s ease;
 }
-
+.avatar:hover {
+  transform: scale(1.08);
+}
 .btn {
   display: inline-block;
   margin: 0 .5rem;
@@ -54,6 +78,35 @@ body {
   text-decoration: none;
   color: var(--text);
   font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.btn:hover {
+  background-color: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+}
+/* Neon 边框按钮样式 */
+.btn-neon {
+  color: #00f7ff;
+  border: 2px solid #00f7ff;
+  padding: .5rem 1.2rem;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  background: transparent;
+  box-shadow: 0 0 5px #00f7ff,
+              0 0 10px #00f7ff,
+              0 0 20px #00f7ff,
+              0 0 40px #00f7ff;
+  transition: all 0.3s ease;
+}
+.btn-neon:hover {
+  background: #00f7ff;
+  color: black;
+  box-shadow: 0 0 10px #00f7ff,
+              0 0 20px #00f7ff,
+              0 0 30px #00f7ff,
+              0 0 60px #00f7ff;
 }
 .favorites, .post-list, .love-list, .archive-list {
   list-style: none;
@@ -71,52 +124,25 @@ body {
   padding: 1rem 0;
   font-size: .875rem;
   color: #666;
+  transition: background 0.3s, color 0.3s;
 }
 .home {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 160px); /* 100% 高度减去 header + footer */
+  min-height: calc(100vh - 160px);
   padding-top: 2rem;
   padding-bottom: 2rem;
+  animation: fadeIn 1s ease-out;
 }
-
 .tagline {
   margin: 0.5rem 0 2rem 0;
   font-style: italic;
   color: #555;
 }
-
 .links {
   margin-top: 1.5rem;
-}
-/* 头像悬停放大 */
-.avatar {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 1.5rem;
-  transition: transform 0.3s ease;
-}
-.avatar:hover {
-  transform: scale(1.08);
-}
-
-/* 按钮悬停浮起变色 */
-.btn {
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-.btn:hover {
-  background-color: var(--primary);
-  color: white;
-  transform: translateY(-2px);
-}
-
-/* 首页内容淡入动画 */
-.home {
-  animation: fadeIn 1s ease-out;
 }
 @keyframes fadeIn {
   from {
