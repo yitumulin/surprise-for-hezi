@@ -605,88 +605,189 @@
         }
     </style>
 </head>
-<body>
-    <div class="floating-hearts"></div>
-    
-    <div class="container">
-        <h1>亲爱的，我想对你说</h1>
-        
-        <div class="countdown" id="countdown"></div>
-        
-        <div class="message" id="message">亲爱的，考试加油！</div>
-        
-        <div class="flight-info">
-            <h2>航班信息</h2>
-            <p>航班号：<span class="highlight">CA1234</span></p>
-            <p>出发地：<span class="highlight">伦敦</span></p>
-            <p>目的地：<span class="highlight">乌鲁木齐</span></p>
-            <p>预计到达时间：<span class="highlight">2025年2月15日</span></p>
-        </div>
-
-        <div class="controls">
-            <button onclick="showLetter()" class="btn-primary">
-                <i class="fas fa-envelope"></i> 打开我的信
-            </button>
-            <button onclick="showPhoto()" class="btn-secondary">
-                <i class="fas fa-camera"></i> 查看照片
-            </button>
-            <button onclick="showWishes()" class="btn-tertiary">
-                <i class="fas fa-star"></i> 许下心愿
-            </button>
-        </div>
-
-        <div class="mood-tracker">
-            <h3>今天的心情如何？</h3>
-            <div class="mood-options">
-                <span class="mood-option" onclick="updateMood('happy')">😊</span>
-                <span class="mood-option" onclick="updateMood('normal')">😐</span>
-                <span class="mood-option" onclick="updateMood('sad')">😢</span>
+<body style="background: #f9f7f3; color: #6b4a23; font-family: 'Segoe UI', 'Arial', sans-serif;">
+    <div class="love-tag" onclick="toggleLoveContent()">love</div>
+    <div class="love-content-modal" id="loveContentModal" onclick="closeLoveContent(event)">
+        <div class="love-content-inner" onclick="event.stopPropagation()">
+            <span class="love-close" onclick="closeLoveContent(event)">×</span>
+            <div id="mainContent">
+                <!-- 原主页内容整体搬迁到这里 -->
+                <h1 style="color:#8B5C2A; font-size:2.2rem; margin-bottom:1.5rem; text-align:center;">亲爱的，我想对你说</h1>
+                <div class="countdown" id="countdown"></div>
+                <div class="message" id="message">亲爱的，考试加油！</div>
+                <div class="flight-info">
+                    <h2>航班信息</h2>
+                    <p>航班号：<span class="highlight">CA1234</span></p>
+                    <p>出发地：<span class="highlight">伦敦</span></p>
+                    <p>目的地：<span class="highlight">乌鲁木齐</span></p>
+                    <p>预计到达时间：<span class="highlight">2025年2月15日</span></p>
+                </div>
+                <div class="controls">
+                    <button onclick="showLetter()" class="btn-primary">
+                        <i class="fas fa-envelope"></i> 打开我的信
+                    </button>
+                    <button onclick="showPhoto()" class="btn-secondary">
+                        <i class="fas fa-camera"></i> 查看照片
+                    </button>
+                    <button onclick="showWishes()" class="btn-tertiary">
+                        <i class="fas fa-star"></i> 许下心愿
+                    </button>
+                </div>
+                <div class="mood-tracker">
+                    <h3>今天的心情如何？</h3>
+                    <div class="mood-options">
+                        <span class="mood-option" onclick="updateMood('happy')">😊</span>
+                        <span class="mood-option" onclick="updateMood('normal')">😐</span>
+                        <span class="mood-option" onclick="updateMood('sad')">😢</span>
+                    </div>
+                </div>
+                <div class="music-control" id="musicControl">
+                    <i class="fas fa-music"></i>
+                </div>
+                <div class="wish-container" id="wishContainer">
+                    <div class="wish-content">
+                        <h3>许下你的心愿</h3>
+                        <textarea id="wishText" placeholder="写下你的心愿..."></textarea>
+                        <button onclick="submitWish()">发送心愿</button>
+                        <span class="close-wish" onclick="closeWish()">×</span>
+                    </div>
+                </div>
+                <div class="photo-gallery" id="photoGallery">
+                    <div class="gallery-content">
+                        <div class="gallery-header">
+                            <h3>我们的回忆</h3>
+                            <span class="close-gallery" onclick="closeGallery()">×</span>
+                        </div>
+                        <div class="gallery-grid">
+                            <!-- 照片将通过JavaScript动态添加 -->
+                        </div>
+                    </div>
+                </div>
+                <audio id="bgMusic" loop>
+                    <source src="https://music.163.com/song/media/outer/url?id=1824045033.mp3" type="audio/mpeg">
+                </audio>
+                <div class="letter" id="letter">
+                    <span class="close-letter" onclick="closeLetter()">×</span>
+                    <div class="letter-content">
+                        <h2>亲爱的宝宝：</h2>
+                        <p>当你看到这封信的时候，我正在想你。</p>
+                        <p>虽然我们相隔万里，但我的心一直和你在一起。每次想到你，我的心里就充满了温暖和力量。</p>
+                        <p>我知道你现在在准备考试，一定很辛苦。但请记住，无论结果如何，你都是最棒的。你的努力和坚持，让我为你感到骄傲。</p>
+                        <p>等你回来，我们一起去吃你最喜欢的火锅，去看你喜欢的电影，去你想去的地方。</p>
+                        <p>我会一直在这里，等你回来。</p>
+                        <p style="text-align: right;">爱你的一土木林</p>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align:center; color:#A67C52; margin-top:2rem; font-size:1rem; letter-spacing:2px;">
+                —— 王森
             </div>
         </div>
     </div>
-
-    <div class="music-control" id="musicControl">
-        <i class="fas fa-music"></i>
-    </div>
-
-    <div class="wish-container" id="wishContainer">
-        <div class="wish-content">
-            <h3>许下你的心愿</h3>
-            <textarea id="wishText" placeholder="写下你的心愿..."></textarea>
-            <button onclick="submitWish()">发送心愿</button>
-            <span class="close-wish" onclick="closeWish()">×</span>
-        </div>
-    </div>
-
-    <div class="photo-gallery" id="photoGallery">
-        <div class="gallery-content">
-            <div class="gallery-header">
-                <h3>我们的回忆</h3>
-                <span class="close-gallery" onclick="closeGallery()">×</span>
-            </div>
-            <div class="gallery-grid">
-                <!-- 照片将通过JavaScript动态添加 -->
-            </div>
-        </div>
-    </div>
-
-    <audio id="bgMusic" loop>
-        <source src="https://music.163.com/song/media/outer/url?id=1824045033.mp3" type="audio/mpeg">
-    </audio>
-
-    <div class="letter" id="letter">
-        <span class="close-letter" onclick="closeLetter()">×</span>
-        <div class="letter-content">
-            <h2>亲爱的宝宝：</h2>
-            <p>当你看到这封信的时候，我正在想你。</p>
-            <p>虽然我们相隔万里，但我的心一直和你在一起。每次想到你，我的心里就充满了温暖和力量。</p>
-            <p>我知道你现在在准备考试，一定很辛苦。但请记住，无论结果如何，你都是最棒的。你的努力和坚持，让我为你感到骄傲。</p>
-            <p>等你回来，我们一起去吃你最喜欢的火锅，去看你喜欢的电影，去你想去的地方。</p>
-            <p>我会一直在这里，等你回来。</p>
-            <p style="text-align: right;">爱你的一土木林</p>
-        </div>
-    </div>
-
+    <footer style="width:100vw; text-align:center; color:#A67C52; font-size:1rem; margin-top:40px; position:fixed; bottom:10px; left:0;">© 王森</footer>
+    <style>
+        .love-tag {
+            position: fixed;
+            top: 30px;
+            right: 40px;
+            background: #8B5C2A;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 2000;
+            box-shadow: 0 2px 8px rgba(139,92,42,0.08);
+            transition: background 0.2s;
+        }
+        .love-tag:hover {
+            background: #A67C52;
+        }
+        .love-content-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.10);
+            z-index: 1999;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .love-content-inner {
+            margin-top: 80px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(139,92,42,0.10);
+            padding: 2.5rem 2rem 2rem 2rem;
+            max-width: 700px;
+            width: 90vw;
+            min-height: 300px;
+            position: relative;
+            animation: fadeInDown 0.4s;
+        }
+        .love-close {
+            position: absolute;
+            top: 18px;
+            right: 22px;
+            font-size: 1.5rem;
+            color: #8B5C2A;
+            cursor: pointer;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* 主题色优化 */
+        .btn-primary {
+            background: linear-gradient(45deg, #8B5C2A, #A67C52);
+            color: #fff;
+        }
+        .btn-secondary {
+            background: linear-gradient(45deg, #C19A6B, #8B5C2A);
+            color: #fff;
+        }
+        .btn-tertiary {
+            background: linear-gradient(45deg, #A67C52, #C19A6B);
+            color: #fff;
+        }
+        .flight-info {
+            background: #f5ede3;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(139,92,42,0.04);
+            color: #6b4a23;
+        }
+        .highlight {
+            color: #8B5C2A;
+            font-weight: bold;
+        }
+        .countdown {
+            background: #f5ede3;
+            color: #8B5C2A;
+            border: 1px solid #e5d3b3;
+        }
+        .mood-tracker {
+            background: #f5ede3;
+            color: #8B5C2A;
+        }
+        .gallery-header h3 {
+            color: #8B5C2A;
+        }
+        .letter-content h2 {
+            color: #8B5C2A;
+        }
+        .music-control i {
+            color: #8B5C2A;
+        }
+        /* 其余样式继承原有 */
+    </style>
+    <script>
+        function toggleLoveContent() {
+            document.getElementById('loveContentModal').style.display = 'flex';
+        }
+        function closeLoveContent(e) {
+            document.getElementById('loveContentModal').style.display = 'none';
+        }
+    </script>
     <script>
         // 优化倒计时功能
         function updateCountdown() {
