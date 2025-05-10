@@ -38,12 +38,13 @@ body {
   padding: 3rem 1rem;
 }
 .avatar {
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
+
 .btn {
   display: inline-block;
   margin: 0 .5rem;
@@ -70,4 +71,60 @@ body {
   padding: 1rem 0;
   font-size: .875rem;
   color: #666;
+}
+.home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 160px); /* 100% 高度减去 header + footer */
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.tagline {
+  margin: 0.5rem 0 2rem 0;
+  font-style: italic;
+  color: #555;
+}
+
+.links {
+  margin-top: 1.5rem;
+}
+/* 头像悬停放大 */
+.avatar {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s ease;
+}
+.avatar:hover {
+  transform: scale(1.08);
+}
+
+/* 按钮悬停浮起变色 */
+.btn {
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.btn:hover {
+  background-color: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* 首页内容淡入动画 */
+.home {
+  animation: fadeIn 1s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
