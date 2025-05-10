@@ -1,0 +1,73 @@
+
+:root {
+  --primary: #8c5a18;
+  --bg: #f8f7f4;
+  --text: #442a16;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  text-align: center;
+}
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+.site-header {
+  background: #fff;
+  padding: .5rem 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary);
+  text-decoration: none;
+}
+.site-nav a {
+  margin-left: 1rem;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+}
+.home, .about, .posts, .loves, .archives, .search, .contact {
+  padding: 3rem 1rem;
+}
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+}
+.btn {
+  display: inline-block;
+  margin: 0 .5rem;
+  padding: .5rem 1rem;
+  border: 1px solid var(--text);
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: bold;
+}
+.favorites, .post-list, .love-list, .archive-list {
+  list-style: none;
+  padding: 0;
+}
+.post-list li, .love-list li, .archive-list li {
+  margin: .5rem 0;
+}
+.qr {
+  width: 150px;
+  margin-top: 1rem;
+}
+.site-footer {
+  background: #fff;
+  padding: 1rem 0;
+  font-size: .875rem;
+  color: #666;
+}
