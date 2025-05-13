@@ -24,6 +24,8 @@
       }
     })();
   </script>
+  <div id="particles-js" style="position: fixed; top:0; left:0; width:100%; height:100%; z-index: -1;"></div>
+
   <header class="site-header">
     <div class="container">
       <a href="index.html" class="logo">Sen's World</a>
@@ -40,10 +42,39 @@
     </div>
   </header>
 
-  <main class="search container">
+  <main class="search container" style="margin-top: -2rem; position: relative; z-index: 1;">
     <h1>Search</h1>
-    <p>Static sites do not support search functionality out-of-the-box. Consider using a third-party service like Algolia or Simple-Jekyll-Search.</p>
+    <div style="margin: 0.5rem 0 2rem 0;">
+      <input type="text" id="searchInput" placeholder="输入关键词搜索..." style="width: 100%; padding: 0.75rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-top: -1rem;">
+    </div>
+    <div id="searchResults"></div>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="https://unpkg.com/lunr/lunr.js"></script>
+  <script src="search.js"></script>
   <script src="darkmode.js"></script>
+  <script>
+    particlesJS("particles-js", {
+      "particles": {
+        "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
+        "color": { "value": "#ffffff" },
+        "shape": { "type": "circle" },
+        "opacity": { "value": 0.5 },
+        "size": { "value": 3 },
+        "line_linked": { "enable": true, "distance": 120, "color": "#ffffff", "opacity": 0.4, "width": 1 },
+        "move": { "enable": true, "speed": 2 }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": { "enable": true, "mode": "grab" },
+          "onclick": { "enable": true, "mode": "push" },
+          "resize": true
+        }
+      },
+      "retina_detect": true
+    });
+  </script>
 </body>
 </html>

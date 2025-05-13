@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1",
+    "title": "Project: AI & Aging Research",
+    "url": "posts/project1.html",
+    "content": "Exploring the intersection of artificial intelligence and aging research, focusing on predictive models. Keywords: AI, machine learning, elderly care, health tech, gerontology.",
+    "date": "2025-05-10",
+    "tags": ["人工智能", "科研", "健康科技"],
+    "category": "技术深度"
+  },
+  {
+    "id": "2",
+    "title": "Deep Dive: Custom Domains",
+    "url": "posts/project2.html",
+    "content": "A comprehensive guide to setting up custom domains for your projects and websites. Topics include DNS configuration, hosting, SSL certificates, and domain management.",
+    "date": "2025-05-09",
+    "tags": ["网站建设", "技术教程", "域名"],
+    "category": "技术教程"
+  },
+  {
+    "id": "3",
+    "title": "About Sen's World",
+    "url": "about.html",
+    "content": "Learn more about Sen, an AI & Bio enthusiast studying at BUPT. Based in Beijing. Interests include artificial intelligence, biology, technology, and personal projects.",
+    "date": "",
+    "tags": ["个人介绍", "关于"],
+    "category": "关于"
+  },
+  {
+    "id": "4",
+    "title": "Contact Sen",
+    "url": "contact.html",
+    "content": "How to reach Sen. Email: hi@yitumulin.com, Telegram, WeChat QR code available. Get in touch for collaborations or just to say hi.",
+    "date": "",
+    "tags": ["联系方式", "关于"],
+    "category": "关于"
+  }
+] 
