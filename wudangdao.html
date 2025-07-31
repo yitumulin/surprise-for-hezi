@@ -496,7 +496,7 @@
       const audioPlayer = document.getElementById('audioPlayer');
       const currentTrackTitle = document.getElementById('currentTrackTitle');
       
-      audioPlayer.src = url;
+      audioPlayer.src = encodeURI(url);
       currentTrackTitle.textContent = `第${episodeNumber}集`;
       
       // 更新播放状态
