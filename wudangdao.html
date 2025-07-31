@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>吾当道 - Sen's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+    .audio-page {
+      padding: 2rem 1rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .audio-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .audio-header h1 {
+      font-family: var(--font-heading);
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+    
+    .audio-header p {
+      font-size: 1.1rem;
+      color: var(--text);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    body.dark .audio-header p {
+      color: var(--text-dark);
+    }
+    
+    .audio-player-section {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+    
+    body.dark .audio-player-section {
+      background: rgba(30, 30, 30, 0.8);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .current-track {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .current-track h3 {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    
+    body.dark .current-track h3 {
+      color: var(--primary-dark);
+    }
+    
+    .audio-player {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .audio-player audio {
+      width: 100%;
+      height: 50px;
+      border-radius: 25px;
+      background: var(--bg);
+    }
+    
+    body.dark .audio-player audio {
+      background: var(--bg-dark);
+    }
+    
+    .audio-list {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+      padding: 1rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(5px);
+    }
+    
+    body.dark .audio-list {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .audio-item {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: 3px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .audio-item:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+      border-color: var(--primary);
+    }
+    
+    .audio-item.playing {
+      border-color: #28a745;
+      background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(255, 255, 255, 0.95));
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+    
+    body.dark .audio-item {
+      background: rgba(40, 40, 40, 0.95);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    body.dark .audio-item:hover {
+      border-color: var(--primary-dark);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    body.dark .audio-item.playing {
+      background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 40, 40, 0.95));
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+    
+    .audio-item h4 {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      color: var(--text);
+      margin-bottom: 0.8rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    body.dark .audio-item h4 {
+      color: var(--text-dark);
+    }
+    
+    .audio-item p {
+      color: var(--text);
+      opacity: 0.7;
+      font-size: 0.9rem;
+      margin-bottom: 1.2rem;
+      text-align: center;
+    }
+    
+    body.dark .audio-item p {
+      color: var(--text-dark);
+    }
+    
+    .play-btn {
+      background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 80%, #000000));
+      color: white;
+      border: none;
+      padding: 0.8rem 1.2rem;
+      border-radius: 25px;
+      cursor: pointer;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .play-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .play-btn:hover::before {
+      left: 100%;
+    }
+    
+    .play-btn:hover {
+      background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 90%, #000000), var(--primary));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(140, 90, 24, 0.4);
+    }
+    
+    body.dark .play-btn {
+      background: linear-gradient(135deg, var(--primary-dark), color-mix(in srgb, var(--primary-dark) 80%, #ffffff));
+    }
+    
+    body.dark .play-btn:hover {
+      background: linear-gradient(135deg, color-mix(in srgb, var(--primary-dark) 90%, #ffffff), var(--primary-dark));
+      box-shadow: 0 6px 20px rgba(243, 156, 18, 0.4);
+    }
+    
+    .play-btn.playing {
+      background: linear-gradient(135deg, #28a745, #20c997) !important;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .search-box {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 2rem;
+      position: relative;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 1.2rem 1.8rem;
+      border: 3px solid var(--primary);
+      border-radius: 30px;
+      font-family: var(--font-body);
+      font-size: 1.1rem;
+      background: var(--bg);
+      color: var(--text);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(140, 90, 24, 0.2), 0 8px 25px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    body.dark .search-box input {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+      border-color: var(--primary-dark);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    body.dark .search-box input:focus {
+      box-shadow: 0 0 0 4px rgba(243, 156, 18, 0.2), 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 3rem;
+      padding: 1rem;
+    }
+    
+    .pagination button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      cursor: pointer;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      min-width: 120px;
+    }
+    
+    .pagination button:hover {
+      background: color-mix(in srgb, var(--primary) 80%, #000000);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(140, 90, 24, 0.3);
+    }
+    
+    .pagination button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    body.dark .pagination button {
+      background: var(--primary-dark);
+    }
+    
+    body.dark .pagination button:hover {
+      background: color-mix(in srgb, var(--primary-dark) 80%, #ffffff);
+      box-shadow: 0 6px 20px rgba(243, 156, 18, 0.3);
+    }
+    
+    .page-info {
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+    
+    body.dark .page-info {
+      color: var(--text-dark);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+    
+    body.dark .loading {
+      color: var(--text-dark);
+    }
+    
+    @media (max-width: 1400px) {
+      .audio-list {
+        grid-template-columns: repeat(8, 1fr);
+      }
+    }
+    
+    @media (max-width: 1200px) {
+      .audio-list {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .audio-list {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+      }
+      
+      .audio-header h1 {
+        font-size: 2rem;
+      }
+      
+      .audio-player-section {
+        padding: 1.5rem;
+      }
+      
+      .audio-item {
+        padding: 1.2rem;
+      }
+      
+      .audio-item h4 {
+        font-size: 1rem;
+      }
+      
+      .play-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .audio-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+      }
+      
+      .audio-item {
+        padding: 1rem;
+      }
+      
+      .pagination {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .pagination button {
+        min-width: 100px;
+        padding: 0.6rem 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (theme === 'dark' || (!theme && prefersDark)) {
+          document.body.classList.add('dark');
+        }
+      } catch (e) {
+        console.error('Error applying initial theme:', e);
+      }
+    })();
+  </script>
+
+  <main class="audio-page">
+    <div class="audio-header">
+      <h1>吾当道</h1>
+      <p>在这里聆听精彩的有声书内容，每一集都是精心挑选的故事，陪伴你的每一个时刻。</p>
+    </div>
+
+    <div class="audio-player-section">
+      <div class="current-track">
+        <h3 id="currentTrackTitle">选择音频开始播放</h3>
+      </div>
+      <div class="audio-player">
+        <audio id="audioPlayer" controls>
+          您的浏览器不支持音频播放。
+        </audio>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="搜索音频..." />
+    </div>
+
+    <div class="audio-list" id="audioList">
+      <div class="loading">正在加载音频列表...</div>
+    </div>
+
+    <div class="pagination" id="pagination" style="display: none;">
+      <button id="prevBtn" onclick="previousPage()">上一页</button>
+      <span class="page-info" id="pageInfo">第 1 页，共 1 页</span>
+      <button id="nextBtn" onclick="nextPage()">下一页</button>
+    </div>
+  </main>
+
+  <script src="darkmode.js"></script>
+  <script>
+    let audioFiles = [];
+    let filteredFiles = [];
+    let currentPage = 1;
+    let itemsPerPage = 30;
+    let currentPlayingIndex = -1;
+
+    // 从JSON文件加载音频列表
+    async function loadAudioList() {
+      try {
+        const response = await fetch('audio_list.json');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        audioFiles = await response.json();
+        filteredFiles = audioFiles;
+        generateAudioList();
+        updatePagination();
+        document.getElementById('pagination').style.display = 'flex';
+      } catch (error) {
+        console.error('Error loading audio list:', error);
+        document.getElementById('audioList').innerHTML = '<div class="loading">加载失败，请刷新页面重试</div>';
+      }
+    }
+
+    // 生成音频列表
+    function generateAudioList() {
+      const audioList = document.getElementById('audioList');
+      audioList.innerHTML = '';
+
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const currentPageFiles = filteredFiles.slice(startIndex, endIndex);
+
+      currentPageFiles.forEach((file, index) => {
+        const globalIndex = startIndex + index;
+        const episodeMatch = file.title.match(/第(\d+)集/);
+        const episodeNumber = episodeMatch ? parseInt(episodeMatch[1]) : globalIndex + 1;
+        
+        const audioItem = document.createElement('div');
+        audioItem.className = 'audio-item';
+        if (globalIndex === currentPlayingIndex) {
+          audioItem.classList.add('playing');
+        }
+        
+        audioItem.innerHTML = `
+          <h4>${file.title}</h4>
+          <p>精彩内容</p>
+          <button class="play-btn ${globalIndex === currentPlayingIndex ? 'playing' : ''}" onclick="playAudio('${file.url}', ${episodeNumber}, ${globalIndex})">
+            ${globalIndex === currentPlayingIndex ? '播放中' : '播放'}
+          </button>
+        `;
+        audioList.appendChild(audioItem);
+      });
+    }
+
+    // 播放音频
+    function playAudio(url, episodeNumber, index) {
+      const audioPlayer = document.getElementById('audioPlayer');
+      const currentTrackTitle = document.getElementById('currentTrackTitle');
+      
+      audioPlayer.src = url;
+      currentTrackTitle.textContent = `第${episodeNumber}集`;
+      
+      // 更新播放状态
+      currentPlayingIndex = index;
+      
+      // 重新生成列表以更新UI
+      generateAudioList();
+      
+      audioPlayer.play();
+    }
+
+    // 更新分页信息
+    function updatePagination() {
+      const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
+      const pageInfo = document.getElementById('pageInfo');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      
+      pageInfo.textContent = `第 ${currentPage} 页，共 ${totalPages} 页`;
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
+    }
+
+    // 上一页
+    function previousPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        generateAudioList();
+        updatePagination();
+      }
+    }
+
+    // 下一页
+    function nextPage() {
+      const totalPages = Math.ceil(filteredFiles.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        generateAudioList();
+        updatePagination();
+      }
+    }
+
+    // 搜索功能
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      
+      if (searchTerm === '') {
+        filteredFiles = audioFiles;
+      } else {
+        filteredFiles = audioFiles.filter(file => {
+          const episodeMatch = file.title.match(/第(\d+)集/);
+          const episodeNumber = episodeMatch ? parseInt(episodeMatch[1]) : 0;
+          return file.title.toLowerCase().includes(searchTerm) || 
+                 episodeNumber.toString().includes(searchTerm);
+        });
+      }
+      
+      currentPage = 1;
+      generateAudioList();
+      updatePagination();
+      
+      // 如果有搜索结果，定位到第一个结果
+      if (filteredFiles.length > 0 && searchTerm !== '') {
+        setTimeout(() => {
+          const firstResult = document.querySelector('.audio-item');
+          if (firstResult) {
+            firstResult.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            });
+            
+            firstResult.style.border = '3px solid #28a745';
+            firstResult.style.boxShadow = '0 0 20px rgba(40, 167, 69, 0.6)';
+            
+            setTimeout(() => {
+              firstResult.style.border = '';
+              firstResult.style.boxShadow = '';
+            }, 3000);
+          }
+        }, 100);
+      }
+    });
+
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', function() {
+      loadAudioList();
+    });
+  </script>
+</body>
+</html> 

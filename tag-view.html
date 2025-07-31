@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>标签视图 - Sen's World</title>
+  <meta name="description" content="按标签或分类浏览 Sen's World 的文章，发现更多感兴趣的内容。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (theme === 'dark' || (!theme && prefersDark)) {
+          document.body.classList.add('dark');
+        }
+      } catch (e) {
+        console.error('Error applying initial theme:', e);
+      }
+    })();
+  </script>
+  <div id="particles-js" style="position: fixed; top:0; left:0; width:100%; height:100%; z-index: -1;"></div>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">Sen's World</a>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="posts.html">Posts</a>
+        <a href="loves.html">Loves</a>
+        <a href="archives.html">Archives</a>
+        <a href="search.html">Search</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button id="darkModeToggle" aria-label="切换夜间模式">🌙</button>
+    </div>
+  </header>
+
+  <main class="container" style="position: relative; z-index: 1;">
+    <h1 id="tag-view-title">标签视图</h1>
+    <div id="tag-results-container"></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="darkmode.js"></script>
+  <script>
+    particlesJS("particles-js", {
+      "particles": {
+        "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
+        "color": { "value": "#ffffff" },
+        "shape": { "type": "circle" },
+        "opacity": { "value": 0.5 },
+        "size": { "value": 3 },
+        "line_linked": { "enable": true, "distance": 120, "color": "#ffffff", "opacity": 0.4, "width": 1 },
+        "move": { "enable": true, "speed": 2 }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": { "enable": true, "mode": "grab" },
+          "onclick": { "enable": true, "mode": "push" },
+          "resize": true
+        }
+      },
+      "retina_detect": true
+    });
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      const resultsContainer = document.getElementById('tag-results-container');
+      const pageTitleElement = document.getElementById('tag-view-title');
+      if (!resultsContainer || !pageTitleElement) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const tagName = params.get('tag');
+      const categoryName = params.get('category');
+      let filterType = '';
+      let filterValue = '';
+
+      if (tagName) {
+        filterType = 'tag';
+        filterValue = tagName;
+        pageTitleElement.textContent = `标签：${tagName}`;
+      } else if (categoryName) {
+        filterType = 'category';
+        filterValue = categoryName;
+        pageTitleElement.textContent = `分类：${categoryName}`;
+      } else {
+        pageTitleElement.textContent = '未指定内容';
+        resultsContainer.innerHTML = '<p>请指定一个标签或分类进行查看。</p>';
+        return;
+      }
+
+      try {
+        const response = await fetch('search-data.json');
+        if (!response.ok) throw new Error('无法加载博文数据');
+        const allPosts = await response.json();
+        let filteredPosts = [];
+
+        if (filterType === 'tag') {
+          filteredPosts = allPosts.filter(post => post.tags && post.tags.includes(filterValue));
+        } else if (filterType === 'category') {
+          filteredPosts = allPosts.filter(post => post.category === filterValue);
+        }
+
+        if (filteredPosts.length === 0) {
+          resultsContainer.innerHTML = `<p>没有找到带有 "${filterValue}" ${filterType === 'tag' ? '标签' : '分类'}的文章。</p>`;
+          return;
+        }
+
+        const ul = document.createElement('ul');
+        ul.className = 'post-list';
+        filteredPosts.forEach(post => {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = post.url;
+          a.textContent = post.title;
+          li.appendChild(a);
+          if (post.date) {
+            const span = document.createElement('span');
+            span.textContent = post.date;
+            li.appendChild(span);
+          }
+          ul.appendChild(li);
+        });
+        resultsContainer.appendChild(ul);
+
+      } catch (error) {
+        console.error('显示标签/分类文章列表时出错:', error);
+        resultsContainer.innerHTML = '<p>加载文章列表时出错。</p>';
+      }
+    });
+  </script>
+</body>
+</html> 

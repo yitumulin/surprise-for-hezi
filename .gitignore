@@ -1,0 +1,6 @@
+*.mp3
+*.wav
+*.ogg
+*.m4a
+/audio/
+/uploads/

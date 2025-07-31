@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About - Sen's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (theme === 'dark' || (!theme && prefersDark)) {
+          document.body.classList.add('dark');
+        }
+      } catch (e) {
+        console.error('Error applying initial theme:', e);
+      }
+    })();
+  </script>
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">Sen's World</a>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="posts.html">Posts</a>
+        <a href="loves.html">Loves</a>
+        <a href="archives.html">Archives</a>
+        <a href="search.html">Search</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button id="darkModeToggle" aria-label="切换夜间模式">🌙</button>
+    </div>
+  </header>
+
+  <main class="about container">
+    <div class="about-header">
+      <h1>About</h1>
+      <p class="subtitle">Of course, you want to check the About first!</p>
+    </div>
+    <div class="about-content">
+      <p>I'm Sen, an AI & Bio enthusiast studying at BUPT. Currently based in Beijing.</p>
+      <p>我是森，现居北京的北邮学生。</p>
+    </div>
+    <div class="favorite-channels-section">
+      <h2>Favorite Channels</h2>
+      <ul class="favorites-grid">
+        <li>
+          <a href="#" class="favorite-item">
+            <img src="thomas.png" alt="Thomas Flight icon">
+            <div class="favorite-item-info">
+              <h3>Thomas Flight</h3>
+              <p>All about cinema</p>
+            </div>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="favorite-item">
+            <img src="geowizard.png" alt="GeoWizard icon">
+            <div class="favorite-item-info">
+              <h3>GeoWizard</h3>
+              <p>Geoguessr and more</p>
+            </div>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="favorite-item">
+            <img src="zhinen.png" alt="稚嫩的魔法师 icon">
+            <div class="favorite-item-info">
+              <h3>稚嫩的魔法师</h3>
+              <p>有趣的策略游戏解说</p>
+            </div>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="favorite-item">
+            <img src="eddie.png" alt="Eddie Woo icon">
+            <div class="favorite-item-info">
+              <h3>Eddie Woo</h3>
+              <p>Picked up many math from him</p>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </main>
+  <script src="darkmode.js"></script>
+</body>
+</html>

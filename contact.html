@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact - Sen's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+</head>
+<body>
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (theme === 'dark' || (!theme && prefersDark)) {
+          document.body.classList.add('dark');
+        }
+      } catch (e) {
+        console.error('Error applying initial theme:', e);
+      }
+    })();
+  </script>
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">Sen's World</a>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="posts.html">Posts</a>
+        <a href="loves.html">Loves</a>
+        <a href="archives.html">Archives</a>
+        <a href="search.html">Search</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button id="darkModeToggle" aria-label="切换夜间模式">🌙</button>
+    </div>
+  </header>
+
+  <main class="contact container">
+    <h1>Contact</h1>
+    <p>You can reach me at:</p>
+    <ul>
+      <li>Email: <a href="mailto:hi@yitumulin.com">hi@yitumulin.com</a></li>
+      <li>Telegram: <a href="https://t.me/yourusername">@yourusername</a></li>
+      <li>WeChat: Scan the QR code below</li>
+    </ul>
+    <img src="wechat-qr.png" alt="WeChat QR Code" class="qr">
+  </main>
+  <script src="darkmode.js"></script>
+</body>
+</html>

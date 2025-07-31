@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project: AI & Aging Research - Sen's World</title>
+  <meta name="description" content="深入探讨人工智能在老龄化研究中的应用，分析了最新的预测模型及其对未来老年健康护理的潜在影响。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <style>
+    .post-container {
+      display: flex;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .post-content {
+      flex: 1;
+      min-width: 0;
+      margin-left: 270px; /* 为左侧目录留出空间 */
+    }
+    #toc-container {
+      width: 250px;
+      position: fixed;
+      left: 20px;
+      top: 50%; /* 将顶部位置设置为50% */
+      transform: translateY(-50%); /* 向上偏移自身高度的一半，实现垂直居中 */
+      max-height: 80vh; /* 限制最大高度为视口高度的80% */
+      overflow-y: auto;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .dark #toc-container {
+      background: rgba(30, 30, 30, 0.9);
+    }
+    #toc-container h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    #toc-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #toc-list ul {
+      list-style: none;
+      padding-left: 1.5rem;
+      margin: 0.5rem 0;
+    }
+    #toc-list a {
+      color: inherit;
+      text-decoration: none;
+      display: block;
+      padding: 0.25rem 0;
+      font-size: 0.9rem;
+    }
+    #toc-list a:hover {
+      color: #666;
+    }
+    .dark #toc-list a:hover {
+      color: #999;
+    }
+    .post-meta {
+      margin: 1rem 0 2rem;
+      color: #666;
+    }
+    .dark .post-meta {
+      color: #999;
+    }
+    .post-tags {
+      margin-top: 1rem;
+    }
+    .post-tags a {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      margin: 0.25rem;
+      background: #f0f0f0;
+      border-radius: 15px;
+      color: #666;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .dark .post-tags a {
+      background: #333;
+      color: #ccc;
+    }
+    .post-tags a:hover {
+      background: #e0e0e0;
+    }
+    .dark .post-tags a:hover {
+      background: #444;
+    }
+    @media (max-width: 768px) {
+      .post-content {
+        margin-left: 0;
+      }
+      #toc-container {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (theme === 'dark' || (!theme && prefersDark)) {
+          document.body.classList.add('dark');
+        }
+      } catch (e) {
+        console.error('Error applying initial theme:', e);
+      }
+    })();
+  </script>
+  <div id="particles-js" style="position: fixed; top:0; left:0; width:100%; height:100%; z-index: -1;"></div>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="../index.html" class="logo">Sen's World</a>
+      <nav class="site-nav">
+        <a href="../index.html">Home</a>
+        <a href="../about.html">About</a>
+        <a href="../posts.html">Posts</a>
+        <a href="../loves.html">Loves</a>
+        <a href="../archives.html">Archives</a>
+        <a href="../search.html">Search</a>
+        <a href="../contact.html">Contact</a>
+      </nav>
+      <button id="darkModeToggle" aria-label="切换夜间模式">🌙</button>
+    </div>
+  </header>
+
+  <main class="container" style="position: relative; z-index: 1;">
+    <aside id="toc-container">
+      <h3>本文目录</h3>
+      <ul id="toc-list"></ul>
+    </aside>
+    <div class="post-container">
+      <article class="post-content">
+        <h1>Project: AI & Aging Research</h1>
+        <div class="post-meta">
+          <time datetime="2025-05-10">2025-05-10</time>
+          <div class="post-tags">
+            <a href="../tag-view.html?tag=人工智能">人工智能</a>
+            <a href="../tag-view.html?tag=科研">科研</a>
+            <a href="../tag-view.html?tag=健康科技">健康科技</a>
+          </div>
+        </div>
+
+        <h2>引言</h2>
+        <p>随着全球人口老龄化趋势的加剧，如何利用人工智能技术改善老年人的生活质量成为一个重要的研究课题。本文将探讨AI在老龄化研究中的应用现状和未来展望。</p>
+
+        <h2>研究背景</h2>
+        <p>人口老龄化是一个全球性的挑战。根据世界卫生组织的数据，到2050年，全球60岁以上人口将达到20亿。这给医疗保健系统带来了巨大压力。</p>
+
+        <h3>现有挑战</h3>
+        <p>传统的老年护理模式面临着以下挑战：</p>
+        <ul>
+          <li>医疗资源分配不均</li>
+          <li>护理人员短缺</li>
+          <li>个性化护理需求增加</li>
+        </ul>
+
+        <h2>AI解决方案</h2>
+        <p>人工智能技术为解决这些问题提供了新的思路。</p>
+
+        <h3>预测模型</h3>
+        <p>通过机器学习算法，我们可以：</p>
+        <ul>
+          <li>预测健康风险</li>
+          <li>优化护理计划</li>
+          <li>提高资源利用效率</li>
+        </ul>
+
+        <h3>智能监测系统</h3>
+        <p>基于计算机视觉和传感器技术，我们可以实现：</p>
+        <ul>
+          <li>实时健康监测</li>
+          <li>异常行为检测</li>
+          <li>紧急情况预警</li>
+        </ul>
+
+        <h2>未来展望</h2>
+        <p>AI技术在老年护理领域的应用前景广阔，但仍需解决以下问题：</p>
+        <ul>
+          <li>数据隐私保护</li>
+          <li>技术可及性</li>
+          <li>伦理考量</li>
+        </ul>
+
+        <h3>研究方向</h3>
+        <p>未来的研究将重点关注：</p>
+        <ul>
+          <li>多模态数据融合</li>
+          <li>个性化算法优化</li>
+          <li>人机协作模式</li>
+        </ul>
+      </article>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script src="../darkmode.js"></script>
+  <script>
+    particlesJS("particles-js", {
+      "particles": {
+        "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
+        "color": { "value": "#ffffff" },
+        "shape": { "type": "circle" },
+        "opacity": { "value": 0.5 },
+        "size": { "value": 3 },
+        "line_linked": { "enable": true, "distance": 120, "color": "#ffffff", "opacity": 0.4, "width": 1 },
+        "move": { "enable": true, "speed": 2 }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": { "enable": true, "mode": "grab" },
+          "onclick": { "enable": true, "mode": "push" },
+          "resize": true
+        }
+      },
+      "retina_detect": true
+    });
+
+    // TOC生成脚本
+    document.addEventListener('DOMContentLoaded', function() {
+      const contentElement = document.querySelector('.post-content');
+      const tocListElement = document.getElementById('toc-list');
+
+      if (!contentElement || !tocListElement) return;
+
+      const headings = contentElement.querySelectorAll('h2, h3, h4');
+      let currentLevel2List = null;
+      let currentLevel3List = null;
+
+      headings.forEach((heading, index) => {
+        const level = parseInt(heading.tagName.substring(1));
+
+        if (!heading.id) {
+          heading.id = 'toc-heading-' + index + '-' + heading.textContent.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+        }
+
+        const listItem = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = '#' + heading.id;
+        link.textContent = heading.textContent.trim();
+        listItem.appendChild(link);
+
+        if (level === 2) {
+          tocListElement.appendChild(listItem);
+          currentLevel2List = document.createElement('ul');
+          listItem.appendChild(currentLevel2List);
+          currentLevel3List = null;
+        } else if (level === 3) {
+          if (!currentLevel2List) {
+            currentLevel2List = tocListElement;
+          }
+          currentLevel2List.appendChild(listItem);
+          currentLevel3List = document.createElement('ul');
+          listItem.appendChild(currentLevel3List);
+        } else if (level === 4) {
+          if (!currentLevel3List) {
+            if (!currentLevel2List) currentLevel2List = tocListElement;
+            currentLevel2List.appendChild(listItem);
+          } else {
+            currentLevel3List.appendChild(listItem);
+          }
+        }
+      });
+
+      tocListElement.querySelectorAll('ul').forEach(ul => {
+        if (!ul.hasChildNodes()) {
+          ul.remove();
+        }
+      });
+    });
+  </script>
+</body>
+</html> 
