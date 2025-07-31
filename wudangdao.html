@@ -449,14 +449,31 @@
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        audioFiles = await response.json();
+        const data = await response.json();
+        console.log('Loaded audio files:', data.length, 'items'); // 添加日志
+        
+        // 验证数据格式
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid data format: expected an array');
+        }
+        
+        // 验证每个音频项
+        data.forEach((item, index) => {
+          if (!item.title || !item.url) {
+            console.warn(`Invalid item at index ${index}:`, item);
+          }
+        });
+        
+        audioFiles = data;
         filteredFiles = audioFiles;
         generateAudioList();
         updatePagination();
         document.getElementById('pagination').style.display = 'flex';
+        console.log('Audio list loaded successfully'); // 添加日志
       } catch (error) {
         console.error('Error loading audio list:', error);
-        document.getElementById('audioList').innerHTML = '<div class="loading">加载失败，请刷新页面重试</div>';
+        document.getElementById('audioList').innerHTML = 
+          `<div class="loading">加载失败：${error.message}，请刷新页面重试</div>`;
       }
     }
 
@@ -483,7 +500,7 @@
         audioItem.innerHTML = `
           <h4>${file.title}</h4>
           <p>精彩内容</p>
-          <button class="play-btn ${globalIndex === currentPlayingIndex ? 'playing' : ''}" onclick="playAudio('${file.url}', ${episodeNumber}, ${globalIndex})">
+          <button class="play-btn ${globalIndex === currentPlayingIndex ? 'playing' : ''}" onclick="playAudio('${file.url.replace(/'/g, "\\'")}', ${episodeNumber}, ${globalIndex})">
             ${globalIndex === currentPlayingIndex ? '播放中' : '播放'}
           </button>
         `;
@@ -496,7 +513,17 @@
       const audioPlayer = document.getElementById('audioPlayer');
       const currentTrackTitle = document.getElementById('currentTrackTitle');
       
-      audioPlayer.src = encodeURI(url);
+      // 确保 URL 使用 encodeURI 处理中文字符
+      const encodedUrl = encodeURI(url);
+      console.log('Playing:', encodedUrl); // 添加日志
+      
+      // 添加错误处理
+      audioPlayer.onerror = function(e) {
+        console.error('Audio error:', e);
+        currentTrackTitle.textContent = `加载失败：第${episodeNumber}集`;
+      };
+      
+      audioPlayer.src = encodedUrl;
       currentTrackTitle.textContent = `第${episodeNumber}集`;
       
       // 更新播放状态
@@ -505,7 +532,10 @@
       // 重新生成列表以更新UI
       generateAudioList();
       
-      audioPlayer.play();
+      audioPlayer.play().catch(e => {
+        console.error('Play failed:', e);
+        currentTrackTitle.textContent = `播放失败：第${episodeNumber}集`;
+      });
     }
 
     // 更新分页信息
