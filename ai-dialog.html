@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI对话 - Sen's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  
+  <style>
+    .ai-dialog-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      min-height: calc(100vh - 120px);
+    }
+    
+    .dialog-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .dialog-header h1 {
+      font-size: 2.8rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+      font-family: var(--font-heading);
+    }
+    
+    .dialog-header p {
+      color: #666;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .service-info {
+      background: rgba(140, 90, 24, 0.1);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .service-info h3 {
+      margin: 0 0 0.5rem 0;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+    
+    .service-info p {
+      margin: 0;
+      color: #666;
+      font-size: 0.95rem;
+    }
+    
+    .dialog-interface {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      overflow: hidden;
+      height: 650px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(140, 90, 24, 0.1);
+    }
+    
+    .dialog-messages {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    }
+    
+    .message {
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: flex-start;
+      animation: messageSlideIn 0.3s ease-out;
+    }
+    
+    .message.user {
+      justify-content: flex-end;
+    }
+    
+    .message-content {
+      max-width: 75%;
+      padding: 1.2rem 1.8rem;
+      border-radius: 20px;
+      font-family: var(--font-body);
+      line-height: 1.7;
+      word-wrap: break-word;
+      position: relative;
+    }
+    
+    .message.user .message-content {
+      background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 85%, #000) 100%);
+      color: white;
+      border-bottom-right-radius: 8px;
+      box-shadow: 0 4px 12px rgba(140, 90, 24, 0.3);
+    }
+    
+    .message.ai .message-content {
+      background: white;
+      color: var(--text);
+      border: 1px solid #e8e8e8;
+      border-bottom-left-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin: 0 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    
+    .message.user .message-avatar {
+      background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 85%, #000) 100%);
+      color: white;
+      order: 1;
+    }
+    
+    .message.ai .message-avatar {
+      background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
+      color: var(--text);
+    }
+    
+    .dialog-input-container {
+      padding: 2rem;
+      background: white;
+      border-top: 1px solid #e8e8e8;
+      display: flex;
+      gap: 1.2rem;
+      align-items: flex-end;
+    }
+    
+    .dialog-input {
+      flex: 1;
+      min-height: 60px;
+      max-height: 140px;
+      padding: 1rem 1.5rem;
+      border: 2px solid #e8e8e8;
+      border-radius: 30px;
+      font-family: var(--font-body);
+      font-size: 1.1rem;
+      resize: none;
+      outline: none;
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+    
+    .dialog-input:focus {
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(140, 90, 24, 0.1);
+    }
+    
+    .send-button {
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 85%, #000) 100%);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 100px;
+      box-shadow: 0 4px 12px rgba(140, 90, 24, 0.3);
+    }
+    
+    .send-button:hover:not(:disabled) {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 16px rgba(140, 90, 24, 0.4);
+    }
+    
+    .send-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .connection-status {
+      text-align: center;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+      border-radius: 12px;
+      font-weight: 500;
+      font-size: 1.1rem;
+      border: 2px solid;
+    }
+    
+    .connection-status.connected {
+      background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
+      color: #155724;
+      border-color: #28a745;
+    }
+    
+    .connection-status.disconnected {
+      background: linear-gradient(135deg, #ffeaea 0%, #f8d7da 100%);
+      color: #721c24;
+      border-color: #dc3545;
+    }
+    
+    .connection-status.connecting {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      color: #856404;
+      border-color: #ffc107;
+    }
+    
+    .typing-indicator {
+      display: none;
+      padding: 1.2rem 2rem;
+      color: #666;
+      font-style: italic;
+      font-size: 1.1rem;
+      background: rgba(140, 90, 24, 0.05);
+      border-radius: 12px;
+      margin: 0 2rem 1rem 2rem;
+    }
+    
+    .typing-indicator.show {
+      display: block;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    .back-link {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-family: var(--font-heading);
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      background: rgba(140, 90, 24, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .back-link:hover {
+      background: rgba(140, 90, 24, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    /* 动画效果 */
+    @keyframes messageSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 0.6;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+    
+    /* 夜间模式样式 */
+    body.dark .dialog-interface {
+      background: #2a2a2a;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      border-color: rgba(243, 156, 18, 0.2);
+    }
+    
+    body.dark .dialog-messages {
+      background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+    }
+    
+    body.dark .message.ai .message-content {
+      background: #2a2a2a;
+      color: var(--text-dark);
+      border-color: #444;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    body.dark .message.ai .message-avatar {
+      background: linear-gradient(135deg, #444 0%, #555 100%);
+      color: var(--text-dark);
+    }
+    
+    body.dark .dialog-input-container {
+      background: #2a2a2a;
+      border-top-color: #444;
+    }
+    
+    body.dark .dialog-input {
+      background: #1e1e1e;
+      color: var(--text-dark);
+      border-color: #444;
+    }
+    
+    body.dark .dialog-input:focus {
+      border-color: var(--primary-dark);
+      background: #2a2a2a;
+      box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
+    }
+    
+    body.dark .connection-status.connected {
+      background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+      color: #a5d6a7;
+    }
+    
+    body.dark .connection-status.disconnected {
+      background: linear-gradient(135deg, #b71c1c 0%, #c62828 100%);
+      color: #ffcdd2;
+    }
+    
+    body.dark .connection-status.connecting {
+      background: linear-gradient(135deg, #f57f17 0%, #ff8f00 100%);
+      color: #fff9c4;
+    }
+    
+    body.dark .typing-indicator {
+      color: #aaa;
+      background: rgba(243, 156, 18, 0.1);
+    }
+    
+    body.dark .service-info {
+      background: rgba(243, 156, 18, 0.1);
+      border-left-color: var(--primary-dark);
+    }
+    
+    body.dark .service-info h3 {
+      color: var(--primary-dark);
+    }
+    
+    body.dark .service-info p {
+      color: #aaa;
+    }
+    
+    body.dark .back-link {
+      color: var(--primary-dark);
+      background: rgba(243, 156, 18, 0.1);
+    }
+    
+    body.dark .back-link:hover {
+      background: rgba(243, 156, 18, 0.2);
+    }
+    
+    /* 服务配置样式 */
+    body.dark .service-config input {
+      background: #2a2a2a;
+      color: var(--text-dark);
+      border-color: #444;
+    }
+    
+    body.dark .service-config input:focus {
+      border-color: var(--primary-dark);
+      outline: none;
+    }
+    
+    body.dark .service-config button {
+      background: var(--primary-dark);
+    }
+    
+    body.dark .service-config button:hover {
+      background: color-mix(in srgb, var(--primary-dark) 85%, #000);
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .ai-dialog-container {
+        padding: 1rem 0.5rem;
+      }
+      
+      .dialog-interface {
+        height: 550px;
+        border-radius: 12px;
+      }
+      
+      .dialog-messages {
+        padding: 1.5rem;
+      }
+      
+      .message-content {
+        max-width: 85%;
+        padding: 1rem 1.5rem;
+      }
+      
+      .dialog-input-container {
+        padding: 1.5rem;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .send-button {
+        align-self: stretch;
+        padding: 1rem;
+      }
+      
+      .back-link {
+        position: relative;
+        top: auto;
+        left: auto;
+        display: inline-block;
+        margin-bottom: 1rem;
+      }
+      
+      .dialog-header h1 {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (theme === 'dark' || (!theme && prefersDark)) {
+          document.body.classList.add('dark');
+        }
+      } catch (e) {
+        console.error('Error applying initial theme:', e);
+      }
+    })();
+  </script>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">Sen's World</a>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="posts.html">Posts</a>
+        <a href="loves.html">Loves</a>
+        <a href="archives.html">Archives</a>
+        <a href="search.html">Search</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <button id="darkModeToggle" aria-label="切换夜间模式">🌙</button>
+    </div>
+  </header>
+
+  <main class="ai-dialog">
+    <div class="ai-dialog-container">
+      <a href="index.html" class="back-link">← 返回首页</a>
+      
+      <div class="dialog-header">
+        <h1>AI智能对话</h1>
+        <p>与您的专属AI助手进行深度交流</p>
+      </div>
+      
+      <div class="service-info">
+        <h3>🔗 服务连接</h3>
+        <p>AI服务地址: <span id="serviceUrl">正在检测...</span></p>
+        <div class="service-config" style="margin-top: 1rem;">
+          <input type="text" id="customServiceUrl" placeholder="输入AI服务地址 (如: http://localhost:7860)" style="width: 300px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; margin-right: 0.5rem;">
+          <button id="updateServiceUrl" style="padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">更新地址</button>
+        </div>
+      </div>
+      
+      <div class="connection-status" id="connectionStatus">
+        <span id="statusText">正在检测连接状态...</span>
+        <button id="retryConnection" class="retry-button" style="display: none; margin-left: 1rem; padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer;">重试连接</button>
+      </div>
+      
+      <div class="dialog-interface">
+        <div class="dialog-messages" id="dialogMessages">
+          <div class="message ai">
+            <div class="message-avatar">🤖</div>
+            <div class="message-content">
+              您好！我是您的AI助手，很高兴为您服务。请告诉我您需要什么帮助？
+            </div>
+          </div>
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+          <span>AI正在思考中...</span>
+        </div>
+        
+        <div class="dialog-input-container">
+          <textarea 
+            id="dialogInput" 
+            class="dialog-input" 
+            placeholder="输入您的消息，按Enter发送，Shift+Enter换行..."
+            rows="1"
+          ></textarea>
+          <button id="sendButton" class="send-button">发送</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="darkmode.js"></script>
+  <script>
+    class AIDialog {
+      constructor() {
+        this.dialogMessages = document.getElementById('dialogMessages');
+        this.dialogInput = document.getElementById('dialogInput');
+        this.sendButton = document.getElementById('sendButton');
+        this.connectionStatus = document.getElementById('connectionStatus');
+        this.statusText = document.getElementById('statusText');
+        this.typingIndicator = document.getElementById('typingIndicator');
+        this.retryButton = document.getElementById('retryConnection');
+        this.serviceUrlDisplay = document.getElementById('serviceUrl');
+        this.customServiceUrlInput = document.getElementById('customServiceUrl');
+        this.updateServiceUrlButton = document.getElementById('updateServiceUrl');
+        
+        this.isConnected = false;
+        this.isTyping = false;
+        // 根据当前域名判断AI服务地址
+        this.aiServiceUrl = this.getAIServiceUrl();
+        
+        this.init();
+      }
+      
+      getAIServiceUrl() {
+        const hostname = window.location.hostname;
+        
+        // 如果是本地开发环境
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          return 'http://localhost:7860';
+        }
+        
+        // 如果是生产环境，尝试不同的可能地址
+        const possibleUrls = [
+          'http://localhost:7860',  // 如果用户在同一台机器上
+          'https://yitumulin.com:7860',  // 如果AI服务在子域名
+          'https://ai.yitumulin.com',  // 如果AI服务在子域名
+          'https://yitumulin.com/api/ai',  // 如果AI服务在API路径
+        ];
+        
+        // 返回第一个可能的URL，用户可以在界面上看到并手动修改
+        return possibleUrls[0];
+      }
+      
+      init() {
+        this.setupEventListeners();
+        this.updateServiceUrlDisplay();
+        this.checkConnection();
+        this.autoResizeTextarea();
+        this.focusInput();
+      }
+      
+      updateServiceUrlDisplay() {
+        this.serviceUrlDisplay.textContent = this.aiServiceUrl;
+        this.customServiceUrlInput.value = this.aiServiceUrl;
+      }
+      
+      updateServiceUrl() {
+        const newUrl = this.customServiceUrlInput.value.trim();
+        if (newUrl) {
+          this.aiServiceUrl = newUrl;
+          this.updateServiceUrlDisplay();
+          this.checkConnection();
+        }
+      }
+      
+      setupEventListeners() {
+        this.sendButton.addEventListener('click', () => this.sendMessage());
+        this.retryButton.addEventListener('click', () => this.checkConnection());
+        this.updateServiceUrlButton.addEventListener('click', () => this.updateServiceUrl());
+        this.dialogInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            this.sendMessage();
+          }
+        });
+        
+        // 自动调整输入框高度
+        this.dialogInput.addEventListener('input', () => {
+          this.autoResizeTextarea();
+        });
+        
+        // 定期检查连接状态
+        setInterval(() => {
+          this.checkConnection();
+        }, 30000); // 每30秒检查一次
+      }
+      
+      autoResizeTextarea() {
+        this.dialogInput.style.height = 'auto';
+        this.dialogInput.style.height = Math.min(this.dialogInput.scrollHeight, 140) + 'px';
+      }
+      
+      focusInput() {
+        this.dialogInput.focus();
+      }
+      
+      async checkConnection() {
+        try {
+          this.updateConnectionStatus('connecting', '正在检测连接...');
+          
+          // 使用简单的ping测试
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          
+          try {
+            // 尝试访问根路径
+            const response = await fetch(`${this.aiServiceUrl}/`, {
+              method: 'GET',
+              mode: 'no-cors',
+              signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            this.isConnected = true;
+            this.updateConnectionStatus('connected', '✅ 已连接到AI服务');
+            return;
+          } catch (fetchError) {
+            clearTimeout(timeoutId);
+            console.log('直接连接失败，尝试API测试:', fetchError);
+          }
+          
+          // 如果直接连接失败，尝试发送测试消息
+          try {
+            const testResponse = await this.sendToAI("测试", true);
+            if (testResponse && !testResponse.includes('无法连接') && !testResponse.includes('连接有问题')) {
+              this.isConnected = true;
+              this.updateConnectionStatus('connected', '✅ 已连接到AI服务');
+              return;
+            }
+          } catch (testError) {
+            console.log('API测试失败:', testError);
+          }
+          
+          // 如果都失败了，但服务可能仍在运行（CORS问题）
+          this.isConnected = true; // 假设服务在运行，让用户尝试发送消息
+          this.updateConnectionStatus('connected', '⚠️ 服务可能正在运行，但存在CORS限制。请尝试发送消息测试。');
+          
+        } catch (error) {
+          this.isConnected = false;
+          this.updateConnectionStatus('disconnected', '❌ 无法连接到AI服务，请确保本地服务正在运行');
+          console.error('连接检测失败:', error);
+        }
+      }
+      
+      updateConnectionStatus(status, text) {
+        this.connectionStatus.className = `connection-status ${status}`;
+        this.statusText.textContent = text;
+        
+        // 显示或隐藏重试按钮
+        if (status === 'disconnected') {
+          this.retryButton.style.display = 'inline-block';
+        } else {
+          this.retryButton.style.display = 'none';
+        }
+      }
+      
+      async sendMessage() {
+        const message = this.dialogInput.value.trim();
+        if (!message) return;
+        
+        // 添加用户消息
+        this.addMessage('user', message);
+        this.dialogInput.value = '';
+        this.autoResizeTextarea();
+        
+        // 禁用发送按钮
+        this.sendButton.disabled = true;
+        this.showTyping();
+        
+        try {
+          // 发送消息到AI服务
+          const response = await this.sendToAI(message);
+          this.hideTyping();
+          this.addMessage('ai', response);
+          
+          // 如果成功发送，更新连接状态
+          if (!this.isConnected) {
+            this.isConnected = true;
+            this.updateConnectionStatus('connected', '✅ 已连接到AI服务');
+          }
+        } catch (error) {
+          this.hideTyping();
+          this.addMessage('ai', '抱歉，我遇到了一些问题。请检查AI服务是否正常运行，或稍后再试。');
+          console.error('发送消息失败:', error);
+        } finally {
+          this.sendButton.disabled = false;
+          this.focusInput();
+        }
+      }
+      
+      async sendToAI(message, isTestConnection = false) {
+        try {
+          // 尝试多种API端点和请求方式
+          const endpoints = [
+            '/api/chat',
+            '/api/v1/chat', 
+            '/chat',
+            '/generate',
+            '/api/generate',
+            '/api/v1/generate',
+            '/v1/chat/completions',
+            '/api/v1/completions'
+          ];
+          
+          // 尝试不同的请求体格式
+          const requestBodies = [
+            { message: message },
+            { prompt: message },
+            { input: message },
+            { text: message },
+            { query: message },
+            { content: message },
+            { 
+              messages: [
+                { role: "user", content: message }
+              ]
+            },
+            {
+              model: "gpt-3.5-turbo",
+              messages: [
+                { role: "user", content: message }
+              ]
+            }
+          ];
+          
+          for (const endpoint of endpoints) {
+            for (const body of requestBodies) {
+              try {
+                console.log(`尝试端点: ${endpoint}`, body);
+                
+                const response = await fetch(`${this.aiServiceUrl}${endpoint}`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type'
+                  },
+                  body: JSON.stringify(body),
+                  mode: 'cors'
+                });
+                
+                if (response.ok) {
+                  const data = await response.json();
+                  const result = data.response || data.message || data.output || data.text || data.content || data.choices?.[0]?.message?.content || '收到回复';
+                  
+                  if (isTestConnection) {
+                    return result;
+                  }
+                  
+                  return result;
+                }
+              } catch (endpointError) {
+                console.log(`端点 ${endpoint} 失败:`, endpointError.message);
+                continue;
+              }
+            }
+          }
+          
+          // 尝试GET请求（某些服务可能支持GET）
+          try {
+            const response = await fetch(`${this.aiServiceUrl}/?q=${encodeURIComponent(message)}`, {
+              method: 'GET',
+              mode: 'cors'
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              const result = data.response || data.message || data.output || data.text || data.content || '收到回复';
+              
+              if (isTestConnection) {
+                return result;
+              }
+              
+              return result;
+            }
+          } catch (getError) {
+            console.log('GET请求失败:', getError.message);
+          }
+          
+          // 如果所有方法都失败，返回提示信息
+          throw new Error('所有API端点都无法访问');
+          
+        } catch (error) {
+          console.log('AI服务调用失败:', error);
+          
+          if (isTestConnection) {
+            throw error;
+          }
+          
+          // 返回更友好的错误信息
+          return `抱歉，我无法连接到AI服务。请检查以下几点：
+          
+1. 确保AI服务正在运行在 ${this.aiServiceUrl}
+2. 检查服务是否支持CORS跨域请求
+3. 尝试在AI服务中添加CORS头：
+   - Access-Control-Allow-Origin: *
+   - Access-Control-Allow-Methods: POST, GET, OPTIONS
+   - Access-Control-Allow-Headers: Content-Type
+
+您收到的消息："${message}"`;
+        }
+      }
+      
+      addMessage(sender, content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.textContent = sender === 'user' ? '👤' : '🤖';
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        messageContent.textContent = content;
+        
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(messageContent);
+        
+        this.dialogMessages.appendChild(messageDiv);
+        this.scrollToBottom();
+      }
+      
+      showTyping() {
+        this.typingIndicator.classList.add('show');
+        this.scrollToBottom();
+      }
+      
+      hideTyping() {
+        this.typingIndicator.classList.remove('show');
+      }
+      
+      scrollToBottom() {
+        setTimeout(() => {
+          this.dialogMessages.scrollTop = this.dialogMessages.scrollHeight;
+        }, 100);
+      }
+    }
+    
+    // 初始化对话应用
+    document.addEventListener('DOMContentLoaded', () => {
+      new AIDialog();
+    });
+  </script>
+</body>
+</html>
