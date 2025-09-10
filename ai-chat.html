@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI对话 - Sen's World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  
+  <style>
+    .ai-chat-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+      min-height: calc(100vh - 200px);
+    }
+    
+    .chat-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .chat-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    
+    .chat-header p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+    
+    .chat-interface {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      background: #fafafa;
+    }
+    
+    .message {
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+    }
+    
+    .message.user {
+      justify-content: flex-end;
+    }
+    
+    .message-content {
+      max-width: 70%;
+      padding: 1rem 1.5rem;
+      border-radius: 18px;
+      font-family: var(--font-body);
+      line-height: 1.6;
+      word-wrap: break-word;
+    }
+    
+    .message.user .message-content {
+      background: var(--primary);
+      color: white;
+      border-bottom-right-radius: 6px;
+    }
+    
+    .message.ai .message-content {
+      background: white;
+      color: var(--text);
+      border: 1px solid #e0e0e0;
+      border-bottom-left-radius: 6px;
+    }
+    
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin: 0 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    
+    .message.user .message-avatar {
+      background: var(--primary);
+      color: white;
+      order: 1;
+    }
+    
+    .message.ai .message-avatar {
+      background: #e0e0e0;
+      color: var(--text);
+    }
+    
+    .chat-input-container {
+      padding: 1.5rem;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+    
+    .chat-input {
+      flex: 1;
+      min-height: 50px;
+      max-height: 120px;
+      padding: 0.75rem 1rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 25px;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      resize: none;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    
+    .chat-input:focus {
+      border-color: var(--primary);
+    }
+    
+    .send-button {
+      padding: 0.75rem 1.5rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      min-width: 80px;
+    }
+    
+    .send-button:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--primary) 85%, #000);
+      transform: translateY(-2px);
+    }
+    
+    .send-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .connection-status {
+      text-align: center;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+    
+    .connection-status.connected {
+      background: #e8f5e8;
+      color: #2d5a2d;
+      border: 1px solid #4caf50;
+    }
+    
+    .connection-status.disconnected {
+      background: #ffeaea;
+      color: #8b0000;
+      border: 1px solid #f44336;
+    }
+    
+    .connection-status.connecting {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffc107;
+    }
+    
+    .typing-indicator {
+      display: none;
+      padding: 1rem 1.5rem;
+      color: #666;
+      font-style: italic;
+    }
+    
+    .typing-indicator.show {
+      display: block;
+    }
+    
+    /* 夜间模式样式 */
+    body.dark .chat-interface {
+      background: #2a2a2a;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    body.dark .chat-messages {
+      background: #1e1e1e;
+    }
+    
+    body.dark .message.ai .message-content {
+      background: #2a2a2a;
+      color: var(--text-dark);
+      border-color: #444;
+    }
+    
+    body.dark .message.ai .message-avatar {
+      background: #444;
+      color: var(--text-dark);
+    }
+    
+    body.dark .chat-input-container {
+      background: #2a2a2a;
+      border-top-color: #444;
+    }
+    
+    body.dark .chat-input {
+      background: #1e1e1e;
+      color: var(--text-dark);
+      border-color: #444;
+    }
+    
+    body.dark .chat-input:focus {
+      border-color: var(--primary-dark);
+    }
+    
+    body.dark .connection-status.connected {
+      background: #1b5e20;
+      color: #a5d6a7;
+    }
+    
+    body.dark .connection-status.disconnected {
+      background: #b71c1c;
+      color: #ffcdd2;
+    }
+    
+    body.dark .connection-status.connecting {
+      background: #f57f17;
+      color: #fff9c4;
+    }
+    
+    body.dark .typing-indicator {
+      color: #aaa;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .ai-chat-container {
+        padding: 1rem 0.5rem;
+      }
+      
+      .chat-interface {
+        height: 500px;
+      }
+      
+      .message-content {
+        max-width: 85%;
+      }
+      
+      .chat-input-container {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .send-button {
+        align-self: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    (function() {
+      try {
+        var theme = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (theme === 'dark' || (!theme && prefersDark)) {
+          document.body.classList.add('dark');
+        }
+      } catch (e) {
+        console.error('Error applying initial theme:', e);
+      }
+    })();
+  </script>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">Sen's World</a>
+      <nav class="site-nav">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="posts.html">Posts</a>
+        <a href="loves.html">Loves</a>
+        <a href="archives.html">Archives</a>
+        <a href="search.html">Search</a>
+        <a href="contact.html">Contact</a>
+        <a href="ai-chat.html" style="color: var(--primary); font-weight: 600;">AI Chat</a>
+      </nav>
+      <button id="darkModeToggle" aria-label="切换夜间模式">🌙</button>
+    </div>
+  </header>
+
+  <main class="ai-chat">
+    <div class="ai-chat-container">
+      <div class="chat-header">
+        <h1>AI对话助手</h1>
+        <p>与您的AI助手进行智能对话</p>
+      </div>
+      
+      <div class="connection-status" id="connectionStatus">
+        <span id="statusText">正在连接...</span>
+      </div>
+      
+      <div class="chat-interface">
+        <div class="chat-messages" id="chatMessages">
+          <div class="message ai">
+            <div class="message-avatar">AI</div>
+            <div class="message-content">
+              您好！我是您的AI助手，有什么可以帮助您的吗？
+            </div>
+          </div>
+        </div>
+        
+        <div class="typing-indicator" id="typingIndicator">
+          AI正在思考中...
+        </div>
+        
+        <div class="chat-input-container">
+          <textarea 
+            id="chatInput" 
+            class="chat-input" 
+            placeholder="输入您的消息..."
+            rows="1"
+          ></textarea>
+          <button id="sendButton" class="send-button">发送</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="darkmode.js"></script>
+  <script>
+    class AIChat {
+      constructor() {
+        this.chatMessages = document.getElementById('chatMessages');
+        this.chatInput = document.getElementById('chatInput');
+        this.sendButton = document.getElementById('sendButton');
+        this.connectionStatus = document.getElementById('connectionStatus');
+        this.statusText = document.getElementById('statusText');
+        this.typingIndicator = document.getElementById('typingIndicator');
+        
+        this.isConnected = false;
+        this.isTyping = false;
+        
+        this.init();
+      }
+      
+      init() {
+        this.setupEventListeners();
+        this.checkConnection();
+        this.autoResizeTextarea();
+      }
+      
+      setupEventListeners() {
+        this.sendButton.addEventListener('click', () => this.sendMessage());
+        this.chatInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            this.sendMessage();
+          }
+        });
+        
+        // 自动调整输入框高度
+        this.chatInput.addEventListener('input', () => {
+          this.autoResizeTextarea();
+        });
+      }
+      
+      autoResizeTextarea() {
+        this.chatInput.style.height = 'auto';
+        this.chatInput.style.height = Math.min(this.chatInput.scrollHeight, 120) + 'px';
+      }
+      
+      async checkConnection() {
+        try {
+          this.updateConnectionStatus('connecting', '正在连接...');
+          
+          // 尝试连接到本地AI服务
+          const response = await fetch('http://localhost:7860/', {
+            method: 'HEAD',
+            mode: 'no-cors',
+            timeout: 5000
+          });
+          
+          this.isConnected = true;
+          this.updateConnectionStatus('connected', '已连接到AI服务');
+        } catch (error) {
+          this.isConnected = false;
+          this.updateConnectionStatus('disconnected', '无法连接到AI服务，请确保本地服务正在运行');
+          console.error('连接失败:', error);
+        }
+      }
+      
+      updateConnectionStatus(status, text) {
+        this.connectionStatus.className = `connection-status ${status}`;
+        this.statusText.textContent = text;
+      }
+      
+      async sendMessage() {
+        const message = this.chatInput.value.trim();
+        if (!message || !this.isConnected) return;
+        
+        // 添加用户消息
+        this.addMessage('user', message);
+        this.chatInput.value = '';
+        this.autoResizeTextarea();
+        
+        // 禁用发送按钮
+        this.sendButton.disabled = true;
+        this.showTyping();
+        
+        try {
+          // 发送消息到AI服务
+          const response = await this.sendToAI(message);
+          this.hideTyping();
+          this.addMessage('ai', response);
+        } catch (error) {
+          this.hideTyping();
+          this.addMessage('ai', '抱歉，我遇到了一些问题。请稍后再试。');
+          console.error('发送消息失败:', error);
+        } finally {
+          this.sendButton.disabled = false;
+        }
+      }
+      
+      async sendToAI(message) {
+        // 这里需要根据您的AI服务的实际API来调整
+        // 由于CORS限制，我们可能需要使用代理或者特定的API端点
+        
+        try {
+          // 尝试直接调用（如果AI服务支持CORS）
+          const response = await fetch('http://localhost:7860/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            return data.response || data.message || '收到回复';
+          } else {
+            throw new Error('API响应错误');
+          }
+        } catch (error) {
+          // 如果直接调用失败，尝试其他方法
+          console.log('直接调用失败，尝试其他方法:', error);
+          
+          // 这里可以添加其他调用方式，比如通过您的服务器代理
+          return 'AI服务暂时不可用，请检查本地服务是否正在运行。';
+        }
+      }
+      
+      addMessage(sender, content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}`;
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.textContent = sender === 'user' ? '我' : 'AI';
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        messageContent.textContent = content;
+        
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(messageContent);
+        
+        this.chatMessages.appendChild(messageDiv);
+        this.scrollToBottom();
+      }
+      
+      showTyping() {
+        this.typingIndicator.classList.add('show');
+        this.scrollToBottom();
+      }
+      
+      hideTyping() {
+        this.typingIndicator.classList.remove('show');
+      }
+      
+      scrollToBottom() {
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+      }
+    }
+    
+    // 初始化聊天应用
+    document.addEventListener('DOMContentLoaded', () => {
+      new AIChat();
+    });
+  </script>
+</body>
+</html>

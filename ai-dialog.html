@@ -534,16 +534,8 @@
           return 'http://localhost:7860';
         }
         
-        // 如果是生产环境，尝试不同的可能地址
-        const possibleUrls = [
-          'http://localhost:7860',  // 如果用户在同一台机器上
-          'https://yitumulin.com:7860',  // 如果AI服务在子域名
-          'https://ai.yitumulin.com',  // 如果AI服务在子域名
-          'https://yitumulin.com/api/ai',  // 如果AI服务在API路径
-        ];
-        
-        // 返回第一个可能的URL，用户可以在界面上看到并手动修改
-        return possibleUrls[0];
+        // 如果是生产环境，使用代理服务器
+        return 'proxy';  // 使用代理服务器
       }
       
       init() {
@@ -555,8 +547,9 @@
       }
       
       updateServiceUrlDisplay() {
-        this.serviceUrlDisplay.textContent = this.aiServiceUrl;
-        this.customServiceUrlInput.value = this.aiServiceUrl;
+        const displayUrl = this.aiServiceUrl === 'proxy' ? '代理服务器 (自动)' : this.aiServiceUrl;
+        this.serviceUrlDisplay.textContent = displayUrl;
+        this.customServiceUrlInput.value = this.aiServiceUrl === 'proxy' ? 'http://localhost:7860' : this.aiServiceUrl;
       }
       
       updateServiceUrl() {
@@ -695,97 +688,13 @@
       
       async sendToAI(message, isTestConnection = false) {
         try {
-          // 尝试多种API端点和请求方式
-          const endpoints = [
-            '/api/chat',
-            '/api/v1/chat', 
-            '/chat',
-            '/generate',
-            '/api/generate',
-            '/api/v1/generate',
-            '/v1/chat/completions',
-            '/api/v1/completions'
-          ];
-          
-          // 尝试不同的请求体格式
-          const requestBodies = [
-            { message: message },
-            { prompt: message },
-            { input: message },
-            { text: message },
-            { query: message },
-            { content: message },
-            { 
-              messages: [
-                { role: "user", content: message }
-              ]
-            },
-            {
-              model: "gpt-3.5-turbo",
-              messages: [
-                { role: "user", content: message }
-              ]
-            }
-          ];
-          
-          for (const endpoint of endpoints) {
-            for (const body of requestBodies) {
-              try {
-                console.log(`尝试端点: ${endpoint}`, body);
-                
-                const response = await fetch(`${this.aiServiceUrl}${endpoint}`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-                    'Access-Control-Allow-Headers': 'Content-Type'
-                  },
-                  body: JSON.stringify(body),
-                  mode: 'cors'
-                });
-                
-                if (response.ok) {
-                  const data = await response.json();
-                  const result = data.response || data.message || data.output || data.text || data.content || data.choices?.[0]?.message?.content || '收到回复';
-                  
-                  if (isTestConnection) {
-                    return result;
-                  }
-                  
-                  return result;
-                }
-              } catch (endpointError) {
-                console.log(`端点 ${endpoint} 失败:`, endpointError.message);
-                continue;
-              }
-            }
+          // 如果使用代理服务器
+          if (this.aiServiceUrl === 'proxy') {
+            return await this.sendViaProxy(message, isTestConnection);
           }
           
-          // 尝试GET请求（某些服务可能支持GET）
-          try {
-            const response = await fetch(`${this.aiServiceUrl}/?q=${encodeURIComponent(message)}`, {
-              method: 'GET',
-              mode: 'cors'
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              const result = data.response || data.message || data.output || data.text || data.content || '收到回复';
-              
-              if (isTestConnection) {
-                return result;
-              }
-              
-              return result;
-            }
-          } catch (getError) {
-            console.log('GET请求失败:', getError.message);
-          }
-          
-          // 如果所有方法都失败，返回提示信息
-          throw new Error('所有API端点都无法访问');
+          // 直接连接方式（本地开发环境）
+          return await this.sendDirect(message, isTestConnection);
           
         } catch (error) {
           console.log('AI服务调用失败:', error);
@@ -795,17 +704,138 @@
           }
           
           // 返回更友好的错误信息
-          return `抱歉，我无法连接到AI服务。请检查以下几点：
-          
-1. 确保AI服务正在运行在 ${this.aiServiceUrl}
-2. 检查服务是否支持CORS跨域请求
-3. 尝试在AI服务中添加CORS头：
-   - Access-Control-Allow-Origin: *
-   - Access-Control-Allow-Methods: POST, GET, OPTIONS
-   - Access-Control-Allow-Headers: Content-Type
+          return `抱歉，我无法连接到AI服务。请尝试以下解决方案：
+
+1. 使用内网穿透工具（如ngrok）：
+   - 下载ngrok: https://ngrok.com/
+   - 运行: ngrok http 7860
+   - 将生成的HTTPS地址输入到上方配置中
+
+2. 修改AI服务添加CORS支持：
+   - 添加CORS头到您的AI服务
+   - 允许来自 yitumulin.com 的请求
+
+3. 使用代理服务器（已自动尝试）
 
 您收到的消息："${message}"`;
         }
+      }
+      
+      async sendViaProxy(message, isTestConnection = false) {
+        try {
+          const response = await fetch('/api/proxy', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              message: message,
+              serviceUrl: 'http://localhost:7860'  // 默认本地服务地址
+            })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            return data.response || data.message || '收到回复';
+          } else {
+            const errorData = await response.json();
+            throw new Error(errorData.error || '代理请求失败');
+          }
+        } catch (error) {
+          console.log('代理请求失败:', error);
+          throw error;
+        }
+      }
+      
+      async sendDirect(message, isTestConnection = false) {
+        // 尝试多种API端点和请求方式
+        const endpoints = [
+          '/api/chat',
+          '/api/v1/chat', 
+          '/chat',
+          '/generate',
+          '/api/generate',
+          '/api/v1/generate',
+          '/v1/chat/completions',
+          '/api/v1/completions'
+        ];
+        
+        // 尝试不同的请求体格式
+        const requestBodies = [
+          { message: message },
+          { prompt: message },
+          { input: message },
+          { text: message },
+          { query: message },
+          { content: message },
+          { 
+            messages: [
+              { role: "user", content: message }
+            ]
+          },
+          {
+            model: "gpt-3.5-turbo",
+            messages: [
+              { role: "user", content: message }
+            ]
+          }
+        ];
+        
+        for (const endpoint of endpoints) {
+          for (const body of requestBodies) {
+            try {
+              console.log(`尝试端点: ${endpoint}`, body);
+              
+              const response = await fetch(`${this.aiServiceUrl}${endpoint}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                body: JSON.stringify(body),
+                mode: 'cors'
+              });
+              
+              if (response.ok) {
+                const data = await response.json();
+                const result = data.response || data.message || data.output || data.text || data.content || data.choices?.[0]?.message?.content || '收到回复';
+                
+                if (isTestConnection) {
+                  return result;
+                }
+                
+                return result;
+              }
+            } catch (endpointError) {
+              console.log(`端点 ${endpoint} 失败:`, endpointError.message);
+              continue;
+            }
+          }
+        }
+        
+        // 尝试GET请求（某些服务可能支持GET）
+        try {
+          const response = await fetch(`${this.aiServiceUrl}/?q=${encodeURIComponent(message)}`, {
+            method: 'GET',
+            mode: 'cors'
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            const result = data.response || data.message || data.output || data.text || data.content || '收到回复';
+            
+            if (isTestConnection) {
+              return result;
+            }
+            
+            return result;
+          }
+        } catch (getError) {
+          console.log('GET请求失败:', getError.message);
+        }
+        
+        // 如果所有方法都失败，返回提示信息
+        throw new Error('所有API端点都无法访问');
       }
       
       addMessage(sender, content) {
