@@ -377,6 +377,25 @@
       background: color-mix(in srgb, var(--primary-dark) 85%, #000);
     }
     
+    /* 连接帮助样式 */
+    body.dark .connection-help {
+      background: rgba(243, 156, 18, 0.1);
+      border-left-color: var(--primary-dark);
+    }
+    
+    body.dark .connection-help h4 {
+      color: var(--primary-dark);
+    }
+    
+    body.dark .connection-help code {
+      background: rgba(0,0,0,0.3);
+      color: var(--text-dark);
+    }
+    
+    body.dark .connection-help a {
+      color: var(--primary-dark);
+    }
+    
     /* 响应式设计 */
     @media (max-width: 768px) {
       .ai-dialog-container {
@@ -466,8 +485,17 @@
         <h3>🔗 服务连接</h3>
         <p>AI服务地址: <span id="serviceUrl">正在检测...</span></p>
         <div class="service-config" style="margin-top: 1rem;">
-          <input type="text" id="customServiceUrl" placeholder="输入AI服务地址 (如: http://localhost:7860)" style="width: 300px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; margin-right: 0.5rem;">
+          <input type="text" id="customServiceUrl" placeholder="输入AI服务地址 (如: https://abc123.ngrok.io)" style="width: 350px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; margin-right: 0.5rem;">
           <button id="updateServiceUrl" style="padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">更新地址</button>
+        </div>
+        <div class="connection-help" style="margin-top: 1rem; padding: 1rem; background: rgba(140, 90, 24, 0.05); border-radius: 8px; border-left: 4px solid var(--primary);">
+          <h4 style="margin: 0 0 0.5rem 0; color: var(--primary); font-size: 1rem;">💡 快速设置指南：</h4>
+          <ol style="margin: 0; padding-left: 1.5rem; font-size: 0.9rem; line-height: 1.6;">
+            <li>下载 <a href="https://ngrok.com/" target="_blank" style="color: var(--primary);">ngrok</a></li>
+            <li>运行：<code style="background: rgba(0,0,0,0.1); padding: 0.2rem 0.4rem; border-radius: 3px;">ngrok http 7860</code></li>
+            <li>复制生成的HTTPS地址到上方输入框</li>
+            <li>点击"更新地址"开始对话</li>
+          </ol>
         </div>
       </div>
       
@@ -704,20 +732,21 @@
           }
           
           // 返回更友好的错误信息
-          return `抱歉，我无法连接到AI服务。请尝试以下解决方案：
+          return `❌ 无法连接到AI服务
 
-1. 使用内网穿透工具（如ngrok）：
-   - 下载ngrok: https://ngrok.com/
-   - 运行: ngrok http 7860
-   - 将生成的HTTPS地址输入到上方配置中
+🔧 解决方案：
+1. 使用ngrok内网穿透（推荐）：
+   • 下载：https://ngrok.com/
+   • 运行：ngrok http 7860
+   • 复制HTTPS地址到上方配置
 
-2. 修改AI服务添加CORS支持：
-   - 添加CORS头到您的AI服务
-   - 允许来自 yitumulin.com 的请求
+2. 确保AI服务正在运行在7860端口
 
-3. 使用代理服务器（已自动尝试）
+3. 检查网络连接
 
-您收到的消息："${message}"`;
+💡 提示：页面已显示详细设置指南，请按照步骤操作。
+
+您发送的消息："${message}"`;
         }
       }
       
