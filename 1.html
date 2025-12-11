@@ -62,13 +62,79 @@
         }
         .hidden { opacity: 0; }
     </style>
-    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js"></script>
-    <script src="https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/RenderPass.js"></script>
-    <script src="https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/ShaderPass.js"></script>
-    <script src="https://unpkg.com/three@0.160.0/examples/jsm/shaders/CopyShader.js"></script>
-    <script src="https://unpkg.com/three@0.160.0/examples/jsm/shaders/LuminosityHighPassShader.js"></script>
-    <script src="https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js"></script>
+    <!-- Three.js 模块加载 -->
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        
+        // 将模块暴露到全局作用域
+        window.THREE = THREE;
+        window.EffectComposer = EffectComposer;
+        window.RenderPass = RenderPass;
+        window.UnrealBloomPass = UnrealBloomPass;
+        
+        // 标记 Three.js 已加载
+        window.threeLoaded = true;
+        if (window.onThreeLoaded) window.onThreeLoaded();
+    </script>
+    <!-- 备用方案：如果模块加载失败，使用 UMD 版本 -->
+    <script>
+        // 立即加载 UMD 版本作为备用（本地文件协议时 ES 模块可能失败）
+        const threeUMDScript = document.createElement('script');
+        threeUMDScript.src = 'https://unpkg.com/three@0.160.0/build/three.min.js';
+        threeUMDScript.onload = () => {
+            console.log('Three.js UMD 版本已加载（备用）');
+            // 加载后处理模块的 UMD 版本
+            const postProcessingScripts = [
+                'https://unpkg.com/three@0.160.0/examples/js/postprocessing/EffectComposer.js',
+                'https://unpkg.com/three@0.160.0/examples/js/postprocessing/RenderPass.js',
+                'https://unpkg.com/three@0.160.0/examples/js/postprocessing/UnrealBloomPass.js'
+            ];
+            let loadedCount = 0;
+            postProcessingScripts.forEach((src, index) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    loadedCount++;
+                    if (loadedCount === postProcessingScripts.length) {
+                        console.log('Three.js 后处理模块已加载（UMD）');
+                        // 如果 ES 模块版本未加载，使用 UMD 版本
+                        if (!window.threeLoaded && window.THREE) {
+                            window.threeLoaded = true;
+                            window.threeUMD = true;
+                            if (window.onThreeLoaded) window.onThreeLoaded();
+                        }
+                    }
+                };
+                document.head.appendChild(script);
+            });
+        };
+        threeUMDScript.onerror = () => {
+            console.error('Three.js UMD 版本加载失败');
+        };
+        document.head.appendChild(threeUMDScript);
+        
+        // 3秒后检查，如果 ES 模块未加载成功，强制使用 UMD 版本
+        setTimeout(() => {
+            if (!window.threeLoaded && window.THREE) {
+                console.warn('ES 模块加载可能失败，使用 UMD 版本');
+                window.threeLoaded = true;
+                window.threeUMD = true;
+                if (window.onThreeLoaded) window.onThreeLoaded();
+            }
+        }, 3000);
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
@@ -211,11 +277,118 @@
     let videoElement;
 
     /**
-     * 主程序入口
+     * 主程序入口 - 等待所有资源加载完成
      */
-    init();
-    initMediaPipe();
-    animate();
+    let initializationStarted = false;
+    let threeReady = false;
+    let mediapipeReady = false;
+    
+    function checkAndInit() {
+        if (initializationStarted) return;
+        if (!threeReady) {
+            console.log('等待 Three.js 加载...');
+            return;
+        }
+        // MediaPipe 不是必需的，即使未加载也继续
+        if (!mediapipeReady) {
+            console.log('等待 MediaPipe 加载（可选）...');
+            // 如果 Three.js 已加载，等待最多 2 秒后继续
+            return;
+        }
+        
+        initializationStarted = true;
+        console.log('开始初始化场景...');
+        try {
+            init();
+            initMediaPipe();
+            animate();
+            // 立即隐藏加载提示
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 500);
+        } catch (error) {
+            console.error('初始化错误:', error);
+            document.getElementById('loading').textContent = '初始化失败: ' + error.message;
+        }
+    }
+    
+    // 等待 Three.js 加载
+    function checkThreeLoaded() {
+        if (window.THREE && window.THREE.Scene) {
+            threeReady = true;
+            console.log('Three.js 已加载');
+            checkAndInit();
+            return true;
+        }
+        return false;
+    }
+    
+    if (window.threeLoaded || checkThreeLoaded()) {
+        threeReady = true;
+        checkAndInit();
+    } else {
+        window.onThreeLoaded = () => {
+            threeReady = true;
+            console.log('Three.js 加载完成（通过回调）');
+            checkAndInit();
+        };
+        
+        // 每 100ms 检查一次 Three.js 是否加载
+        const checkThree = setInterval(() => {
+            if (checkThreeLoaded()) {
+                clearInterval(checkThree);
+            }
+        }, 100);
+        
+        // 10秒超时，即使 Three.js 未加载也尝试初始化（可能会失败但至少不会卡住）
+        setTimeout(() => {
+            clearInterval(checkThree);
+            if (!threeReady) {
+                console.error('Three.js 加载超时，尝试使用备用方案');
+                // 尝试直接使用 window.THREE（如果存在）
+                if (window.THREE) {
+                    threeReady = true;
+                    checkAndInit();
+                } else {
+                    document.getElementById('loading').textContent = 'Three.js 加载失败，请检查网络连接';
+                }
+            }
+        }, 10000);
+    }
+    
+    // 等待 MediaPipe 加载（可选）
+    function checkMediaPipeLoaded() {
+        // MediaPipe 可能通过不同的方式暴露，检查多种可能
+        if ((typeof Hands !== 'undefined' && typeof Camera !== 'undefined') ||
+            (window.Hands && window.Camera)) {
+            mediapipeReady = true;
+            console.log('MediaPipe 已加载');
+            checkAndInit();
+            return true;
+        }
+        return false;
+    }
+    
+    if (checkMediaPipeLoaded()) {
+        // 已加载
+    } else {
+        // 监听 MediaPipe 加载
+        const checkMediaPipe = setInterval(() => {
+            if (checkMediaPipeLoaded()) {
+                clearInterval(checkMediaPipe);
+            }
+        }, 100);
+        
+        // 2秒超时，即使 MediaPipe 未加载也继续（场景仍可显示）
+        setTimeout(() => {
+            clearInterval(checkMediaPipe);
+            if (!mediapipeReady) {
+                console.warn('MediaPipe 加载超时，继续初始化（无摄像头功能）');
+                mediapipeReady = true; // 允许继续
+                checkAndInit();
+            }
+        }, 2000);
+    }
 
     function init() {
         // 1. Scene Setup
@@ -240,18 +413,39 @@
         generateParticles();
 
         // 5. Post Processing (Bloom)
-        const renderScene = new THREE.RenderPass(scene, camera);
-        
-        // UnrealBloomPass 参数: resolution, strength, radius, threshold
-        // $$ strength = 1.5, radius = 0.4, threshold = 0.85 $$
-        const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.strength = 1.8;
-        bloomPass.radius = 0.5;
-        bloomPass.threshold = 0.1; // 阈值低一点让绿色也能发光
+        try {
+            // 尝试多种方式获取后处理类
+            let RenderPassClass = window.RenderPass || (typeof RenderPass !== 'undefined' ? RenderPass : null);
+            let UnrealBloomPassClass = window.UnrealBloomPass || (typeof UnrealBloomPass !== 'undefined' ? UnrealBloomPass : null);
+            let EffectComposerClass = window.EffectComposer || (typeof EffectComposer !== 'undefined' ? EffectComposer : null);
+            
+            // 如果使用 UMD 版本，类可能在 THREE 命名空间下
+            if (!RenderPassClass && window.THREE && window.THREE.RenderPass) {
+                RenderPassClass = window.THREE.RenderPass;
+                UnrealBloomPassClass = window.THREE.UnrealBloomPass;
+                EffectComposerClass = window.THREE.EffectComposer;
+            }
+            
+            if (RenderPassClass && UnrealBloomPassClass && EffectComposerClass) {
+                const renderScene = new RenderPassClass(scene, camera);
+                
+                // UnrealBloomPass 参数: resolution, strength, radius, threshold
+                // $$ strength = 1.5, radius = 0.4, threshold = 0.85 $$
+                const bloomPass = new UnrealBloomPassClass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+                bloomPass.strength = 1.8;
+                bloomPass.radius = 0.5;
+                bloomPass.threshold = 0.1; // 阈值低一点让绿色也能发光
 
-        composer = new THREE.EffectComposer(renderer);
-        composer.addPass(renderScene);
-        composer.addPass(bloomPass);
+                composer = new EffectComposerClass(renderer);
+                composer.addPass(renderScene);
+                composer.addPass(bloomPass);
+            } else {
+                throw new Error('后处理类未找到');
+            }
+        } catch (error) {
+            console.warn('后处理效果初始化失败，使用基础渲染:', error);
+            composer = null; // 如果后处理失败，使用基础渲染器
+        }
 
         // Resize Listener
         window.addEventListener('resize', onWindowResize, false);
@@ -405,28 +599,54 @@
     }
 
     function initMediaPipe() {
+        // 尝试多种方式获取 MediaPipe 类
+        const HandsClass = window.Hands || (typeof Hands !== 'undefined' ? Hands : null);
+        const CameraClass = window.Camera || (typeof Camera !== 'undefined' ? Camera : null);
+        
+        if (!HandsClass || !CameraClass) {
+            console.warn('MediaPipe 未加载，跳过摄像头初始化');
+            document.getElementById('loading').classList.add('hidden');
+            return;
+        }
+        
         videoElement = document.getElementById('video-input');
-        const hands = new Hands({locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-        }});
+        
+        try {
+            const hands = new HandsClass({locateFile: (file) => {
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+            }});
 
-        hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.5,
-            minTrackingConfidence: 0.5
-        });
+            hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
 
-        hands.onResults(onHandsResults);
+            hands.onResults(onHandsResults);
 
-        const cameraUtils = new Camera(videoElement, {
-            onFrame: async () => {
-                await hands.send({image: videoElement});
-            },
-            width: 320,
-            height: 240
-        });
-        cameraUtils.start();
+            const cameraUtils = new CameraClass(videoElement, {
+                onFrame: async () => {
+                    await hands.send({image: videoElement});
+                },
+                width: 320,
+                height: 240
+            });
+            
+            // Camera.start() 可能返回 Promise 或直接执行
+            if (cameraUtils.start && typeof cameraUtils.start === 'function') {
+                const startResult = cameraUtils.start();
+                if (startResult && typeof startResult.catch === 'function') {
+                    startResult.catch((error) => {
+                        console.error('摄像头启动失败:', error);
+                        document.getElementById('loading').classList.add('hidden');
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('MediaPipe 初始化错误:', error);
+            document.getElementById('loading').classList.add('hidden');
+        }
     }
 
     function onHandsResults(results) {
@@ -518,8 +738,12 @@
             points.rotation.y = time * 0.05;
         }
 
-        // 3. Render via Composer (Bloom)
-        composer.render();
+        // 3. Render via Composer (Bloom) or basic renderer
+        if (composer) {
+            composer.render();
+        } else {
+            renderer.render(scene, camera);
+        }
     }
 
 </script>
